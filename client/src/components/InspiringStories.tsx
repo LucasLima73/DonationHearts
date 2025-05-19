@@ -3,11 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 // Story data
 const stories = [
   {
-    id: 1,
+    id: "1",
     name: "Amanda Oliveira",
     title: "Intercâmbio em Paris",
     image: "https://images.unsplash.com/photo-1541943181603-d8fe267a5dcf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
@@ -19,7 +20,7 @@ const stories = [
     featured: true
   },
   {
-    id: 2,
+    id: "2",
     name: "Carla Mendes",
     title: "Ensaio fotográfico profissional",
     image: "https://images.unsplash.com/photo-1541845157-a6d2d100c931?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
@@ -30,7 +31,7 @@ const stories = [
     highlight: "Novo"
   },
   {
-    id: 3,
+    id: "3",
     name: "Julia Santos",
     title: "Festival de música internacional",
     image: "https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
@@ -41,7 +42,7 @@ const stories = [
     highlight: "Últimos dias"
   },
   {
-    id: 4,
+    id: "4",
     name: "Natália Ferreira",
     title: "Equipamento para estúdio",
     image: "https://images.unsplash.com/photo-1547153760-18fc86324498?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
@@ -137,10 +138,12 @@ export default function InspiringStories() {
                       variant="link" 
                       className="p-0 h-auto font-medium text-primary hover:text-primary/80"
                     >
-                      <div className="flex items-center">
-                        Saber mais
-                        <ExternalLink className="ml-1 h-3 w-3" />
-                      </div>
+                      <Link href={`/detalhes/${story.id}`}>
+                        <div className="flex items-center">
+                          Saber mais
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </div>
+                      </Link>
                     </Button>
                     
                     <Button 
@@ -148,10 +151,12 @@ export default function InspiringStories() {
                       variant="ghost" 
                       className="p-0 h-auto font-medium text-secondary hover:text-secondary/80"
                     >
-                      <div className="flex items-center">
-                        Doar
-                        <ArrowRight className="ml-1 h-3 w-3" />
-                      </div>
+                      <Link href={`/detalhes/${story.id}`}>
+                        <div className="flex items-center">
+                          Doar
+                          <ArrowRight className="ml-1 h-3 w-3" />
+                        </div>
+                      </Link>
                     </Button>
                   </div>
                 
@@ -162,7 +167,9 @@ export default function InspiringStories() {
                       asChild
                       className="bg-white text-primary hover:bg-white/90 rounded-md"
                     >
-                      <div>Apoiar {story.name.split(' ')[0]}</div>
+                      <Link href={`/detalhes/${story.id}`}>
+                        <div>Apoiar {story.name.split(' ')[0]}</div>
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
