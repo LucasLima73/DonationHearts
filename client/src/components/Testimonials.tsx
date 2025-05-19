@@ -1,43 +1,52 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
     id: 1,
-    name: "Luísa Mendes",
-    role: "Donatária",
-    image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
-    quote: "Graças ao DoeAqui consegui comprar os equipamentos para iniciar meu pequeno negócio. A generosidade das pessoas mudou completamente minha vida."
+    name: "Camila Torres",
+    role: "Influenciadora",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
+    quote: "Quando compartilhei meu sonho de ir ao festival de moda em Milão, não esperava que tantas pessoas se conectariam com minha história. O DoeAqui mudou minha carreira!",
+    stars: 5
   },
   {
     id: 2,
-    name: "Roberto Almeida",
-    role: "Doador",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
-    quote: "Doar através do DoeAqui me permitiu ver o impacto direto da minha contribuição. Receber o agradecimento e ver a alegria das pessoas não tem preço."
+    name: "Mariana Duarte",
+    role: "Estudante de Cinema",
+    image: "https://images.unsplash.com/photo-1619855544858-e05e1e2e9da5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
+    quote: "Graças aos apoiadores do DoeAqui, consegui comprar minha primeira câmera profissional. A comunidade não só doou, mas me incentivou a seguir meu sonho!",
+    stars: 5
   },
   {
     id: 3,
-    name: "Carolina Santos",
-    role: "Donatária",
-    image: "https://images.unsplash.com/photo-1558203728-00f45181dd84?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
-    quote: "O tratamento médico do meu filho seria impossível sem a ajuda que recebi. Hoje ele está recuperado e feliz, e isso não tem preço. Gratidão eterna!"
+    name: "Sofia Lima",
+    role: "Designer Gráfica",
+    image: "https://images.unsplash.com/photo-1598550880863-4e8aa3d0edb4?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
+    quote: "Abrir meu estúdio parecia impossível, mas a comunidade do DoeAqui tornou isso realidade. Agora tenho meu próprio espaço e estou realizando projetos incríveis!",
+    stars: 5
   },
   {
     id: 4,
-    name: "Pedro Gomes",
-    role: "Doador",
-    image: "https://images.unsplash.com/photo-1488161628813-04466f872be2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100&q=80",
-    quote: "Como doador regular, posso dizer que o DoeAqui é a plataforma mais transparente que já utilizei. Cada centavo vai realmente para quem precisa."
+    name: "Larissa Mendonça",
+    role: "Empreendedora",
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
+    quote: "Com o DoeAqui, consegui lançar minha linha de produtos naturais. A transparência da plataforma fez toda diferença para criar confiança com os apoiadores.",
+    stars: 5
   }
 ];
 
 export default function Testimonials() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true,
+    align: "start",
+    skipSnaps: false
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
@@ -72,7 +81,7 @@ export default function Testimonials() {
   const scrollTo = (index: number) => emblaApi && emblaApi.scrollTo(index);
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24 bg-slate-50/50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2 
@@ -82,7 +91,7 @@ export default function Testimonials() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Depoimentos
+            Histórias de <span className="text-gradient">Sucesso</span>
           </motion.h2>
           <motion.p 
             className="text-gray-600 text-lg max-w-2xl mx-auto"
@@ -91,46 +100,48 @@ export default function Testimonials() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Veja o que dizem as pessoas que já participaram da nossa comunidade.
+            Veja como o DoeAqui está transformando sonhos em realidade e inspirando pessoas a seguirem seus caminhos.
           </motion.p>
         </div>
 
         <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
+          <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
             <div className="flex">
               {testimonials.map((testimonial) => (
-                <div className="flex-[0_0_100%] min-w-0 pl-4 md:flex-[0_0_50%] lg:flex-[0_0_33.333%]" key={testimonial.id}>
-                  <Card className="card-hover bg-white rounded-xl h-full">
-                    <CardContent className="p-6">
-                      <div className="flex items-center mb-4">
-                        <img 
-                          src={testimonial.image} 
-                          alt={testimonial.name} 
-                          className="w-16 h-16 rounded-full object-cover mr-4"
-                        />
-                        <div>
+                <div className="flex-[0_0_100%] min-w-0 px-4 md:flex-[0_0_50%] lg:flex-[0_0_33.333%]" key={testimonial.id}>
+                  <Card className="card-hover bg-white rounded-lg h-full border-0 shadow-md overflow-hidden">
+                    <div className="h-1.5 w-full bg-gradient-to-r from-primary via-secondary to-accent"></div>
+                    <CardContent className="p-8">
+                      <Quote className="h-10 w-10 text-secondary/20 mb-4 -ml-1" />
+                      <p className="text-gray-700 italic mb-6">"{testimonial.quote}"</p>
+                      
+                      <div className="flex items-center">
+                        <Avatar className="h-14 w-14 border-2 border-secondary/20">
+                          <AvatarImage src={testimonial.image} alt={testimonial.name} />
+                          <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4">
                           <h4 className="font-semibold text-lg">{testimonial.name}</h4>
-                          <p className="text-gray-600">{testimonial.role}</p>
+                          <p className="text-secondary font-medium">{testimonial.role}</p>
+                          
+                          <div className="flex mt-1">
+                            {[...Array(testimonial.stars)].map((_, i) => (
+                              <svg 
+                                key={i}
+                                xmlns="http://www.w3.org/2000/svg" 
+                                viewBox="0 0 24 24" 
+                                fill="currentColor" 
+                                className="w-4 h-4 text-yellow-500"
+                              >
+                                <path 
+                                  fillRule="evenodd" 
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" 
+                                  clipRule="evenodd" 
+                                />
+                              </svg>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                      <Quote className="h-8 w-8 text-primary/20 mb-2" />
-                      <p className="text-gray-700">"{testimonial.quote}"</p>
-                      <div className="flex mt-4">
-                        {[...Array(5)].map((_, i) => (
-                          <svg 
-                            key={i}
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="currentColor" 
-                            className="w-5 h-5 text-yellow-500"
-                          >
-                            <path 
-                              fillRule="evenodd" 
-                              d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" 
-                              clipRule="evenodd" 
-                            />
-                          </svg>
-                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -144,7 +155,7 @@ export default function Testimonials() {
             onClick={scrollPrev}
             size="icon"
             variant="secondary"
-            className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full bg-white shadow-md text-primary z-10 md:left-4 focus:ring-2 focus:ring-primary"
+            className="absolute top-1/2 left-0 -translate-y-1/2 rounded-full bg-white shadow-md text-primary z-10 md:left-4 focus:ring-2 focus:ring-primary hover:bg-white/90"
             aria-label="Anterior"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -154,18 +165,22 @@ export default function Testimonials() {
             onClick={scrollNext}
             size="icon"
             variant="secondary"
-            className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full bg-white shadow-md text-primary z-10 md:right-4 focus:ring-2 focus:ring-primary"
+            className="absolute top-1/2 right-0 -translate-y-1/2 rounded-full bg-white shadow-md text-primary z-10 md:right-4 focus:ring-2 focus:ring-primary hover:bg-white/90"
             aria-label="Próximo"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
 
           {/* Dots indicator */}
-          <div className="flex justify-center space-x-2 mt-6">
+          <div className="flex justify-center space-x-2 mt-8">
             {scrollSnaps.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full transition-colors ${index === selectedIndex ? 'bg-primary' : 'bg-gray-300'}`}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
+                  index === selectedIndex 
+                    ? 'bg-secondary w-6' 
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
                 onClick={() => scrollTo(index)}
                 aria-label={`Ir para slide ${index + 1}`}
               />

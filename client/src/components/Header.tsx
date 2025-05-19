@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import Logo from "./Logo";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,7 +27,7 @@ export default function Header() {
   };
 
   return (
-    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md py-2" : "bg-white/90 py-3"}`}>
+    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? "backdrop-blur-md bg-white/90 shadow-md py-2" : "backdrop-blur-sm bg-white/70 py-3"}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -49,24 +49,34 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6">
             <Link href="/">
-              <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium">Início</a>
+              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Início</div>
             </Link>
             <Link href="#explore">
-              <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium">Explorar</a>
+              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Explorar</div>
             </Link>
             <Link href="#how-it-works">
-              <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium">Como Funciona</a>
+              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Como Funciona</div>
             </Link>
             <Link href="#register">
-              <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium">Cadastre-se</a>
+              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Cadastre-se</div>
             </Link>
             <Link href="#login">
-              <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium">Entrar</a>
+              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Entrar</div>
             </Link>
-            <Button asChild className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-full">
+            <Button 
+              asChild 
+              className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
+            >
               <Link href="#request">
-                <a>Faça seu Pedido</a>
+                <div>Faça seu Pedido</div>
               </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-2 text-primary hover:text-primary/80 hover:bg-primary/10"
+            >
+              <Search className="h-5 w-5" />
             </Button>
           </nav>
         </div>
@@ -83,23 +93,27 @@ export default function Header() {
             >
               <nav className="flex flex-col space-y-4">
                 <Link href="/">
-                  <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Início</a>
+                  <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Início</div>
                 </Link>
                 <Link href="#explore">
-                  <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Explorar</a>
+                  <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Explorar</div>
                 </Link>
                 <Link href="#how-it-works">
-                  <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Como Funciona</a>
+                  <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Como Funciona</div>
                 </Link>
                 <Link href="#register">
-                  <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Cadastre-se</a>
+                  <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Cadastre-se</div>
                 </Link>
                 <Link href="#login">
-                  <a className="font-heading text-foreground hover:text-primary transition duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Entrar</a>
+                  <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Entrar</div>
                 </Link>
-                <Button asChild className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-full w-full" onClick={() => setIsMenuOpen(false)}>
+                <Button 
+                  asChild 
+                  className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md w-full btn-glow" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <Link href="#request">
-                    <a>Faça seu Pedido</a>
+                    <div>Faça seu Pedido</div>
                   </Link>
                 </Button>
               </nav>

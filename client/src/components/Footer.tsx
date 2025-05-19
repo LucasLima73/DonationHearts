@@ -19,31 +19,31 @@ const footerLinks = {
     { name: "Imprensa", href: "#press" },
   ],
   socialMedia: [
-    { name: "Facebook", href: "#", icon: Facebook },
     { name: "Instagram", href: "#", icon: Instagram },
     { name: "Twitter", href: "#", icon: Twitter },
     { name: "Youtube", href: "#", icon: Youtube },
+    { name: "Facebook", href: "#", icon: Facebook },
   ],
 };
 
 export default function Footer() {
   return (
-    <footer className="bg-[#2D3748] text-white pt-16 pb-8">
+    <footer className="bg-gradient-to-br from-primary/95 via-primary/90 to-secondary/90 text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="flex items-center mb-4">
               <Logo dark />
             </div>
-            <p className="text-gray-400 mb-4">
-              Conectando corações generosos a sonhos possíveis desde 2023.
+            <p className="text-white/80 mb-6">
+              Conectando sonhos e apoiadores de todo o Brasil desde 2023
             </p>
             <div className="flex space-x-4">
               {footerLinks.socialMedia.map((social) => (
                 <a 
                   key={social.name} 
                   href={social.href} 
-                  className="text-white hover:text-secondary transition duration-200"
+                  className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-md transition-all duration-200"
                   aria-label={social.name}
                 >
                   <social.icon className="h-5 w-5" />
@@ -54,13 +54,13 @@ export default function Footer() {
 
           <div>
             <h3 className="font-semibold text-lg mb-4">Links Rápidos</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition duration-200">
+                    <div className="text-white/70 hover:text-white transition-all duration-200">
                       {link.name}
-                    </a>
+                    </div>
                   </Link>
                 </li>
               ))}
@@ -69,13 +69,13 @@ export default function Footer() {
 
           <div>
             <h3 className="font-semibold text-lg mb-4">Informações</h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {footerLinks.information.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href}>
-                    <a className="text-gray-400 hover:text-white transition duration-200">
+                    <div className="text-white/70 hover:text-white transition-all duration-200">
                       {link.name}
-                    </a>
+                    </div>
                   </Link>
                 </li>
               ))}
@@ -84,14 +84,14 @@ export default function Footer() {
 
           <div>
             <h3 className="font-semibold text-lg mb-4">Newsletter</h3>
-            <p className="text-gray-400 mb-4">
-              Receba histórias inspiradoras e novidades diretamente no seu e-mail.
+            <p className="text-white/70 mb-4">
+              Receba histórias inspiradoras e as últimas novidades diretamente no seu e-mail.
             </p>
             <NewsletterForm />
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8 mt-8 text-center text-gray-500">
+        <div className="border-t border-white/20 pt-8 mt-8 text-center text-white/60">
           <p>&copy; {new Date().getFullYear()} DoeAqui. Todos os direitos reservados.</p>
         </div>
       </div>

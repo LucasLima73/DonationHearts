@@ -1,32 +1,35 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Edit, Heart, Smile } from "lucide-react";
+import { Camera, Sparkles, Rocket } from "lucide-react";
 
 const steps = [
   {
     id: 1,
-    title: "1. Conte sua história",
-    description: "Compartilhe seu pedido conosco, explicando sua necessidade e como a ajuda fará diferença em sua vida.",
-    icon: Edit
+    title: "Compartilhe seu desejo",
+    description: "Crie seu perfil, adicione fotos e conte sua história de forma autêntica e transparente.",
+    icon: Camera,
+    color: "from-primary to-accent"
   },
   {
     id: 2,
-    title: "2. Receba doações",
-    description: "Pessoas generosas de todo o Brasil conhecerão sua história e poderão contribuir para realizar seu desejo.",
-    icon: Heart
+    title: "Conecte-se com apoiadores",
+    description: "Nossa comunidade é formada por pessoas que acreditam em sonhos e querem ajudar a realizá-los.",
+    icon: Sparkles,
+    color: "from-secondary to-primary"
   },
   {
     id: 3,
-    title: "3. Realize seu sonho",
-    description: "Quando a meta for atingida, você receberá o valor para realizar seu desejo e poderá compartilhar sua alegria.",
-    icon: Smile
+    title: "Torne-se realidade",
+    description: "Receba o valor arrecadado, realize seu sonho e compartilhe sua jornada com a comunidade.",
+    icon: Rocket,
+    color: "from-accent to-secondary"
   }
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-16 md:py-24 bg-neutral">
+    <section id="how-it-works" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2 
@@ -36,7 +39,7 @@ export default function HowItWorks() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Como Funciona
+            Como <span className="text-gradient">Funciona</span>
           </motion.h2>
           <motion.p 
             className="text-gray-600 text-lg max-w-2xl mx-auto"
@@ -45,7 +48,7 @@ export default function HowItWorks() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Três passos simples para conectar quem precisa com quem pode ajudar.
+            Três passos simples para transformar seus sonhos em realidade com o DoeAqui
           </motion.p>
         </div>
 
@@ -58,9 +61,10 @@ export default function HowItWorks() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
             >
-              <Card className="card-hover text-center bg-white h-full">
+              <Card className="card-hover text-center bg-white h-full border-0 shadow-md overflow-hidden">
+                <div className={`h-1 w-full bg-gradient-to-r ${step.color}`}></div>
                 <CardContent className="p-8">
-                  <div className="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className={`w-16 h-16 bg-gradient-to-r ${step.color} rounded-md flex items-center justify-center mx-auto mb-6 transform -translate-y-1 rotate-3 shadow-lg`}>
                     <step.icon className="text-white h-8 w-8" />
                   </div>
                   <h3 className="font-bold text-xl mb-4">{step.title}</h3>
@@ -80,10 +84,10 @@ export default function HowItWorks() {
         >
           <Button 
             asChild
-            className="bg-primary hover:bg-primary/90 text-white font-heading rounded-full"
+            className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
             size="lg"
           >
-            <a href="#">Comece agora mesmo</a>
+            <div>Comece agora mesmo</div>
           </Button>
         </motion.div>
       </div>

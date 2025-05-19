@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { Send } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "E-mail inválido" }).min(1, {
@@ -48,29 +49,38 @@ export default function NewsletterForm() {
       transition={{ duration: 0.5 }}
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-3">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    placeholder="Seu e-mail"
-                    {...field}
-                    className="bg-gray-700 text-white border-0 focus:ring-2 focus:ring-secondary"
-                  />
+                  <div className="relative">
+                    <Input
+                      placeholder="Seu melhor e-mail"
+                      {...field}
+                      className="bg-white/10 text-white border-0 pl-4 pr-4 py-6 focus-visible:ring-2 focus-visible:ring-white/30 rounded-md placeholder:text-white/50"
+                    />
+                  </div>
                 </FormControl>
-                <FormMessage className="text-red-300" />
+                <FormMessage className="text-red-200 text-sm" />
               </FormItem>
             )}
           />
           <Button 
             type="submit" 
-            className="bg-secondary text-white hover:bg-secondary/90 font-medium transition duration-200"
+            className="bg-white hover:bg-white/90 text-primary font-medium transition duration-200 py-6 rounded-md flex justify-center items-center btn-glow"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Inscrevendo..." : "Inscrever-se"}
+            {isSubmitting ? (
+              "Processando..."
+            ) : (
+              <>
+                Inscrever-se
+                <Send className="ml-2 h-4 w-4" />
+              </>
+            )}
           </Button>
         </form>
       </Form>

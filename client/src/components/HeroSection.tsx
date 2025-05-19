@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "wouter";
+import { ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -14,30 +15,33 @@ export default function HeroSection() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-4">
-              Realize sonhos.<br />
-              <span className="text-primary">Conecte corações.</span>
+              Faça seus sonhos <br />
+              <span className="text-gradient">virarem realidade</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8">
-              Uma plataforma onde pessoas ajudam pessoas, um desejo de cada vez.
+              Conecte-se, compartilhe desejos e veja a magia acontecer. Sem barreiras, apenas possibilidades.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Button 
                 asChild 
-                className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-full"
+                className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
                 size="lg"
               >
                 <Link href="#request">
-                  <a>Faça seu Pedido</a>
+                  <div className="flex items-center">
+                    Faça seu Pedido
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </div>
                 </Link>
               </Button>
               <Button 
                 asChild 
                 variant="outline" 
-                className="border-primary text-primary hover:bg-primary hover:text-white font-heading rounded-full"
+                className="border-primary text-primary hover:bg-primary hover:text-white font-heading rounded-md"
                 size="lg"
               >
                 <Link href="#help">
-                  <a>Quero Ajudar</a>
+                  <div>Quero Ajudar</div>
                 </Link>
               </Button>
             </div>
@@ -49,8 +53,8 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <img 
-              src="https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80" 
-              alt="Pessoas felizes recebendo presentes" 
+              src="https://images.unsplash.com/photo-1545911825-6bfa5b0c34a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80" 
+              alt="Mulher feliz celebrando" 
               className="rounded-lg shadow-xl w-full h-auto object-cover"
             />
           </motion.div>
@@ -58,9 +62,10 @@ export default function HeroSection() {
       </div>
       
       {/* Decorative background elements */}
-      <div className="absolute -z-10 top-0 right-0 w-full h-full overflow-hidden opacity-10">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-secondary -ml-20 -mb-20"></div>
+      <div className="absolute -z-10 top-0 right-0 w-full h-full overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 blur-[100px] rounded-full bg-primary/40 -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 blur-[100px] rounded-full bg-secondary/40 -ml-20 -mb-20"></div>
+        <div className="absolute top-1/2 left-1/3 w-60 h-60 blur-[80px] rounded-full bg-accent/30"></div>
       </div>
     </section>
   );

@@ -1,49 +1,55 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Story data
 const stories = [
   {
     id: 1,
-    name: "Ana Silva",
-    title: "Material escolar para faculdade",
-    image: "https://images.unsplash.com/photo-1517256673644-36ad11246d21?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
-    raised: 750,
-    goal: 1000,
-    progress: 75,
-    story: "Estou prestes a realizar meu sonho de ser a primeira da família a cursar faculdade. Preciso de ajuda com os materiais do curso."
+    name: "Amanda Oliveira",
+    title: "Intercâmbio em Paris",
+    image: "https://images.unsplash.com/photo-1541943181603-d8fe267a5dcf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
+    raised: 4750,
+    goal: 6000,
+    progress: 78,
+    story: "Ganhei uma bolsa parcial para um intercâmbio em moda na França, mas preciso de ajuda com os custos restantes para realizar meu sonho.",
+    highlight: "Tendência",
+    featured: true
   },
   {
     id: 2,
-    name: "Carlos Oliveira",
-    title: "Equipamento médico especial",
-    image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
+    name: "Carla Mendes",
+    title: "Ensaio fotográfico profissional",
+    image: "https://images.unsplash.com/photo-1541845157-a6d2d100c931?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
     raised: 1350,
-    goal: 3000,
-    progress: 45,
-    story: "Após 40 anos trabalhando, preciso de um equipamento especial para melhorar minha qualidade de vida que não é coberto pelo plano de saúde."
+    goal: 2000,
+    progress: 67,
+    story: "Sou modelo iniciante e preciso de um book profissional para conseguir melhores oportunidades. Ajude-me a dar este passo na minha carreira!",
+    highlight: "Novo"
   },
   {
     id: 3,
-    name: "Mariana Costa",
-    title: "Tratamento médico especial",
-    image: "https://images.unsplash.com/photo-1498940757830-82f7813bf178?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
-    raised: 4250,
+    name: "Julia Santos",
+    title: "Festival de música internacional",
+    image: "https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
+    raised: 3250,
     goal: 5000,
-    progress: 85,
-    story: "Tenho 9 anos e preciso de um tratamento especial que não está disponível na minha cidade. Com sua ajuda, posso ter uma vida normal."
+    progress: 65,
+    story: "Fui convidada para me apresentar em um festival na Europa, uma chance única para minha carreira como cantora. Preciso de ajuda com passagens e estadia.",
+    highlight: "Últimos dias"
   },
   {
     id: 4,
-    name: "Família Rodrigues",
-    title: "Reforma emergencial na casa",
-    image: "https://images.unsplash.com/photo-1581952976147-5a2d15560349?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
-    raised: 2100,
-    goal: 6000,
-    progress: 35,
-    story: "Após as últimas chuvas, nossa casa teve danos estruturais e precisamos de ajuda para fazer reparos urgentes para garantir a segurança dos nossos filhos."
+    name: "Natália Ferreira",
+    title: "Equipamento para estúdio",
+    image: "https://images.unsplash.com/photo-1547153760-18fc86324498?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80",
+    raised: 5100,
+    goal: 8000,
+    progress: 63,
+    story: "Estou expandindo meu estúdio de design e preciso de equipamentos novos para atender grandes clientes. Este investimento mudará minha carreira!",
+    featured: true
   },
 ];
 
@@ -64,7 +70,7 @@ const item = {
 
 export default function InspiringStories() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-16 md:py-24" id="explore">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2 
@@ -74,7 +80,7 @@ export default function InspiringStories() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Histórias que Inspiram
+            <span className="text-gradient">Inspire-se</span> com Histórias Reais
           </motion.h2>
           <motion.p 
             className="text-gray-600 text-lg max-w-2xl mx-auto"
@@ -83,12 +89,12 @@ export default function InspiringStories() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Conheça algumas pessoas que estão prestes a realizar seus sonhos graças à generosidade da nossa comunidade.
+            Conheça mulheres incríveis que estão transformando seus sonhos em realidade com a ajuda da nossa comunidade.
           </motion.p>
         </div>
 
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           variants={container}
           initial="hidden"
           whileInView="show"
@@ -96,20 +102,27 @@ export default function InspiringStories() {
         >
           {stories.map((story) => (
             <motion.div key={story.id} variants={item} className="h-full">
-              <Card className="story-card card-hover bg-white rounded-xl overflow-hidden relative h-full">
-                <img 
-                  src={story.image} 
-                  alt={`${story.name} buscando apoio para ${story.title}`} 
-                  className="w-full h-48 object-cover"
-                />
-                <CardContent className="p-5">
+              <Card className="story-card card-hover bg-white rounded-lg overflow-hidden relative h-full border-0 shadow-md group">
+                <div className="relative overflow-hidden">
+                  <img 
+                    src={story.image} 
+                    alt={`${story.name} buscando apoio para ${story.title}`} 
+                    className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {story.highlight && (
+                    <Badge className="absolute top-3 right-3 bg-secondary text-white border-0 font-medium">
+                      {story.highlight}
+                    </Badge>
+                  )}
+                </div>
+                <CardContent className="p-5 relative">
                   <h3 className="font-semibold text-lg mb-1">{story.name}</h3>
-                  <p className="text-gray-600 mb-3">{story.title}</p>
+                  <p className="text-gray-600 mb-3 font-medium">{story.title}</p>
                   
                   {/* Progress bar */}
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
                     <div 
-                      className="bg-primary h-2.5 rounded-full" 
+                      className={`${story.featured ? 'bg-gradient-to-r from-primary to-secondary' : 'bg-primary'} h-2.5 rounded-full`}
                       style={{ width: `${story.progress}%` }}
                     ></div>
                   </div>
@@ -118,22 +131,38 @@ export default function InspiringStories() {
                     <span className="font-medium">{story.progress}%</span>
                   </div>
                   
-                  <Button 
-                    asChild
-                    variant="link" 
-                    className="p-0 h-auto font-medium text-primary hover:text-primary/80"
-                  >
-                    <a href="#">Ajudar {story.name}</a>
-                  </Button>
-                
-                  {/* Overlay that appears on hover */}
-                  <div className="story-overlay absolute inset-0 bg-gradient-to-t from-primary/90 to-primary/70 p-6 flex flex-col justify-end text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    <p className="mb-4">"{story.story}"</p>
+                  <div className="mt-auto flex justify-between items-center">
                     <Button 
                       asChild
-                      className="bg-white text-primary hover:bg-white/90 rounded-full"
+                      variant="link" 
+                      className="p-0 h-auto font-medium text-primary hover:text-primary/80"
                     >
-                      <a href="#">Conheça minha história</a>
+                      <div className="flex items-center">
+                        Saber mais
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </div>
+                    </Button>
+                    
+                    <Button 
+                      asChild
+                      variant="ghost" 
+                      className="p-0 h-auto font-medium text-secondary hover:text-secondary/80"
+                    >
+                      <div className="flex items-center">
+                        Doar
+                        <ArrowRight className="ml-1 h-3 w-3" />
+                      </div>
+                    </Button>
+                  </div>
+                
+                  {/* Overlay that appears on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary via-secondary/90 to-accent/80 p-6 flex flex-col justify-end text-white opacity-0 transition-all duration-300 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0">
+                    <p className="mb-4 text-sm">"{story.story}"</p>
+                    <Button 
+                      asChild
+                      className="bg-white text-primary hover:bg-white/90 rounded-md"
+                    >
+                      <div>Apoiar {story.name.split(' ')[0]}</div>
                     </Button>
                   </div>
                 </CardContent>
@@ -145,13 +174,13 @@ export default function InspiringStories() {
         <div className="text-center mt-12">
           <Button 
             asChild
-            variant="link" 
-            className="text-primary text-lg font-medium hover:text-primary/80"
+            variant="outline" 
+            className="text-primary border-primary hover:bg-primary hover:text-white text-lg font-medium"
           >
-            <a href="#" className="flex items-center">
+            <div className="flex items-center">
               Ver todas as histórias
               <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
+            </div>
           </Button>
         </div>
       </div>
