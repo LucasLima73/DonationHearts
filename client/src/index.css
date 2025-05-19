@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 267 100% 65%;  /* Purple */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 336 83% 70%;  /* Pink */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 171 73% 56%;  /* Light blue/teal */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 267 100% 65%;
+  --radius: 0.5rem;
+  
+  /* Chart colors */
+  --chart-1: 267 100% 65%;
+  --chart-2: 336 83% 70%;
+  --chart-3: 171 73% 56%;
+  --chart-4: 199 89% 48%;
+  --chart-5: 47 100% 50%;
+  
+  /* Sidebar colors */
+  --sidebar-background: 267 100% 65%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 171 73% 56%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 336 83% 70%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 267 70% 70%;
+  --sidebar-ring: 171 73% 56%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 267 100% 65%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 336 83% 70%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 171 73% 56%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 267 100% 65%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .card-hover:hover {
+    @apply transform -translate-y-1 shadow-lg;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .font-body {
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
