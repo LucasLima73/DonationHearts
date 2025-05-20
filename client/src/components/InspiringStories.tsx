@@ -103,20 +103,21 @@ export default function InspiringStories() {
         >
           {stories.map((story) => (
             <motion.div key={story.id} variants={item} className="h-full">
-              <Card className="story-card card-hover bg-white rounded-lg overflow-hidden relative h-full border-0 shadow-md group">
+              <Card className="story-card card-hover glass-card rounded-lg overflow-hidden relative h-full border-0 shadow-2xl group neon-border">
                 <div className="relative overflow-hidden">
                   <img 
                     src={story.image} 
                     alt={`${story.name} buscando apoio para ${story.title}`} 
                     className="w-full h-56 object-cover transition-transform duration-700 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   {story.highlight && (
-                    <Badge className="absolute top-3 right-3 bg-secondary text-white border-0 font-medium">
+                    <Badge className="absolute top-3 right-3 bg-secondary text-white border-0 font-medium backdrop-blur-sm">
                       {story.highlight}
                     </Badge>
                   )}
                 </div>
-                <CardContent className="p-5 relative">
+                <CardContent className="p-5 relative backdrop-blur-md">
                   <h3 className="font-semibold text-lg mb-1">{story.name}</h3>
                   <p className="text-gray-600 mb-3 font-medium">{story.title}</p>
                   

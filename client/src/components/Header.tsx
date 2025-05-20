@@ -27,7 +27,7 @@ export default function Header() {
   };
 
   return (
-    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? "backdrop-blur-md bg-white/90 shadow-md py-2" : "backdrop-blur-sm bg-white/70 py-3"}`}>
+    <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? "glass-panel shadow-lg py-2" : "backdrop-blur-sm bg-black/40 py-3"}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -65,7 +65,7 @@ export default function Header() {
             </Link>
             <Button 
               asChild 
-              className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
+              className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow neon-border"
             >
               <Link href="#request">
                 <div>Faça seu Pedido</div>

@@ -81,8 +81,14 @@ export default function Testimonials() {
   const scrollTo = (index: number) => emblaApi && emblaApi.scrollTo(index);
 
   return (
-    <section className="py-16 md:py-24 bg-slate-50/50">
-      <div className="container mx-auto px-4">
+    <section className="py-16 md:py-24 relative overflow-hidden grid-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/5 mix-blend-overlay"></div>
+      
+      {/* Decorative blobs */}
+      <div className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-accent/10 blur-[80px] mix-blend-screen"></div>
+      <div className="absolute bottom-1/4 left-1/3 w-80 h-80 rounded-full bg-primary/10 blur-[100px] mix-blend-screen"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
           <motion.h2 
             className="text-3xl md:text-4xl mb-4"
@@ -94,7 +100,7 @@ export default function Testimonials() {
             Histórias de <span className="text-gradient">Sucesso</span>
           </motion.h2>
           <motion.p 
-            className="text-gray-600 text-lg max-w-2xl mx-auto"
+            className="text-gray-300 text-lg max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -109,19 +115,24 @@ export default function Testimonials() {
             <div className="flex">
               {testimonials.map((testimonial) => (
                 <div className="flex-[0_0_100%] min-w-0 px-4 md:flex-[0_0_50%] lg:flex-[0_0_33.333%]" key={testimonial.id}>
-                  <Card className="card-hover bg-white rounded-lg h-full border-0 shadow-md overflow-hidden">
+                  <Card className="card-hover glass-card rounded-xl h-full border-0 shadow-2xl overflow-hidden neon-border">
                     <div className="h-1.5 w-full bg-gradient-to-r from-primary via-secondary to-accent"></div>
-                    <CardContent className="p-8">
-                      <Quote className="h-10 w-10 text-secondary/20 mb-4 -ml-1" />
-                      <p className="text-gray-700 italic mb-6">"{testimonial.quote}"</p>
+                    <CardContent className="p-8 backdrop-blur-md">
+                      <Quote className="h-10 w-10 text-secondary/30 mb-4 -ml-1" />
+                      <p className="text-gray-200 italic mb-6">"{testimonial.quote}"</p>
                       
                       <div className="flex items-center">
-                        <Avatar className="h-14 w-14 border-2 border-secondary/20">
+                        <Avatar 
+                          className="h-14 w-14 ring-2 ring-secondary/40"
+                          style={{
+                            boxShadow: "0 0 10px rgba(220, 50, 120, 0.3)"
+                          }}
+                        >
                           <AvatarImage src={testimonial.image} alt={testimonial.name} />
                           <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="ml-4">
-                          <h4 className="font-semibold text-lg">{testimonial.name}</h4>
+                          <h4 className="font-semibold text-lg text-white">{testimonial.name}</h4>
                           <p className="text-secondary font-medium">{testimonial.role}</p>
                           
                           <div className="flex mt-1">
