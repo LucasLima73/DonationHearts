@@ -57,10 +57,10 @@ export default function Header() {
             <Link href="#how-it-works">
               <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Como Funciona</div>
             </Link>
-            <Link href="#register">
+            <Link href="/register">
               <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Cadastre-se</div>
             </Link>
-            <Link href="#login">
+            <Link href="/login">
               <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Entrar</div>
             </Link>
             <Button 
@@ -101,10 +101,10 @@ export default function Header() {
                 <Link href="#how-it-works">
                   <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Como Funciona</div>
                 </Link>
-                <Link href="#register">
+                <Link href="/register">
                   <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Cadastre-se</div>
                 </Link>
-                <Link href="#login">
+                <Link href="/login">
                   <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium" onClick={() => setIsMenuOpen(false)}>Entrar</div>
                 </Link>
                 <Button 
