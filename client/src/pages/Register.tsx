@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
 import Logo from "@/components/Logo";
+import { supabase } from "@/lib/supabase";
 
 const formSchema = z.object({
   name: z.string().min(3, {
@@ -57,9 +58,24 @@ export default function Register() {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
-    // Simulando envio para API
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      console.log("Registrando usuário:", data.email);
+      
+      // Registrar usuário no Supabase
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Cadastro realizado com sucesso!",
         description: "Você será redirecionado para a página inicial.",
@@ -67,9 +83,19 @@ export default function Register() {
       
       // Redirecionar para a home após cadastro bem-sucedido
       setTimeout(() => {
-        setLocation("/");
+        setLocation("/login");
       }, 2000);
-    }, 1500);
+      
+    } catch (error: any) {
+      console.error("Erro ao registrar:", error);
+      toast({
+        title: "Erro ao criar conta",
+        description: error.message || "Ocorreu um erro ao tentar criar sua conta. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleShowPassword = () => {
