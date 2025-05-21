@@ -77,9 +77,9 @@ export default function NewCampaign() {
       description: '',
       category: '',
       goal: 0,
-      imageUrl: '',
-      userId: user?.id || '',
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 dias a partir de hoje
+      image_url: '',
+      user_id: user?.id || '',
+      end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 dias a partir de hoje
     }
   });
 
@@ -118,7 +118,7 @@ export default function NewCampaign() {
         .from('campaign-images')
         .getPublicUrl(data.path);
       
-      form.setValue('imageUrl', urlData.publicUrl);
+      form.setValue('image_url', urlData.publicUrl);
       
       toast({
         title: 'Upload realizado',
@@ -153,7 +153,7 @@ export default function NewCampaign() {
         .from('campaigns')
         .insert({
           ...data,
-          userId: user.id
+          user_id: user.id
         })
         .select('id')
         .single();
@@ -300,7 +300,7 @@ export default function NewCampaign() {
                     {/* Data de encerramento */}
                     <FormField
                       control={form.control}
-                      name="endDate"
+                      name="end_date"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel className="text-white">Data de encerramento</FormLabel>
@@ -360,7 +360,7 @@ export default function NewCampaign() {
                     {/* Imagem */}
                     <FormField
                       control={form.control}
-                      name="imageUrl"
+                      name="image_url"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-white">Imagem da campanha</FormLabel>
