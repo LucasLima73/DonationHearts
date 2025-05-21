@@ -88,8 +88,8 @@ export default function CampaignDetail() {
       description: campaign.description,
       category: campaign.category,
       goal: campaign.goal,
-      imageUrl: campaign.imageUrl,
-      endDate: campaign.endDate,
+      image_url: campaign.image_url,
+      end_date: campaign.end_date,
       status: campaign.status
     });
     

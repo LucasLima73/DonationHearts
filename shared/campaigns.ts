@@ -11,10 +11,10 @@ export const campaigns = pgTable('campaigns', {
   category: text('category').notNull(),
   goal: integer('goal').notNull(),
   raised: integer('raised').default(0),
-  imageUrl: text('image_url'),
-  createdAt: timestamp('created_at').defaultNow(),
-  endDate: timestamp('end_date'),
-  userId: uuid('user_id').notNull(),
+  image_url: text('image_url'),
+  created_at: timestamp('created_at').defaultNow(),
+  end_date: timestamp('end_date'),
+  user_id: uuid('user_id').notNull(),
   status: text('status').default('active') // active, completed, canceled
 });
 
@@ -22,23 +22,23 @@ export const campaigns = pgTable('campaigns', {
 export const donations = pgTable('donations', {
   id: uuid('id').defaultRandom().primaryKey(),
   amount: integer('amount').notNull(),
-  campaignId: uuid('campaign_id').notNull().references(() => campaigns.id),
-  userId: uuid('user_id').notNull(),
+  campaign_id: uuid('campaign_id').notNull().references(() => campaigns.id),
+  user_id: uuid('user_id').notNull(),
   message: text('message'),
   anonymous: boolean('anonymous').default(false),
-  createdAt: timestamp('created_at').defaultNow()
+  created_at: timestamp('created_at').defaultNow()
 });
 
 // Schemas para validação usando zod
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,
   raised: true,
-  createdAt: true
+  created_at: true
 });
 
 export const insertDonationSchema = createInsertSchema(donations).omit({
   id: true,
-  createdAt: true
+  created_at: true
 });
 
 // Tipos de inferência para uso no front-end
