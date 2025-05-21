@@ -408,6 +408,7 @@ export default function Dashboard() {
                 variant="default" 
                 size="default"
                 className="bg-primary hover:bg-primary/90"
+                onClick={() => setLocation('/nova-campanha')}
               >
                 <PlusCircle className="w-4 h-4 mr-2" />
                 Nova Campanha
