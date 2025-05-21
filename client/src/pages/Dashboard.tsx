@@ -252,7 +252,7 @@ export default function Dashboard() {
                 </div>
               </motion.div>
               
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4" id="campaigns-created-section">
                 <h2 className="text-xl font-bold text-white">Minhas Campanhas</h2>
               </div>
               
@@ -336,6 +336,7 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mb-10"
+              id="achievements-section"
             >
               <UserLevel totalPoints={mockUserPoints} />
             </motion.div>
