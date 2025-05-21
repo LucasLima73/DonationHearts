@@ -191,19 +191,21 @@ export default function Dashboard() {
             {/* Cards de estatísticas */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4" id="donations-made-section">
-                <h2 className="text-xl font-bold text-white">Minhas Doações</h2>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={toggleHideValues}
-                  className="hover:bg-white/5"
-                  title={hideValues ? "Mostrar valores" : "Esconder valores"}
-                >
-                  {hideValues ? 
-                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  }
-                </Button>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-white">Minhas Doações</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={toggleHideValues}
+                    className="h-8 w-8 p-0 hover:bg-white/5"
+                    title={hideValues ? "Mostrar valores" : "Esconder valores"}
+                  >
+                    {hideValues ? 
+                      <EyeOff className="h-4 w-4 text-gray-400" /> : 
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    }
+                  </Button>
+                </div>
               </div>
               
               <motion.div
@@ -286,7 +288,21 @@ export default function Dashboard() {
               </motion.div>
               
               <div className="flex items-center justify-between mb-4" id="campaigns-created-section">
-                <h2 className="text-xl font-bold text-white">Minhas Campanhas</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-white">Minhas Campanhas</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={toggleHideValues}
+                    className="h-8 w-8 p-0 hover:bg-white/5"
+                    title={hideValues ? "Mostrar valores" : "Esconder valores"}
+                  >
+                    {hideValues ? 
+                      <EyeOff className="h-4 w-4 text-gray-400" /> : 
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    }
+                  </Button>
+                </div>
               </div>
               
               <motion.div
