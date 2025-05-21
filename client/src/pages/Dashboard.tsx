@@ -463,8 +463,18 @@ export default function Dashboard() {
                               />
                             </div>
                             <div className="flex justify-between mt-2 text-sm">
-                              <span className="text-gray-400">R$ {campaign.raised.toLocaleString('pt-BR')}</span>
-                              <span className="text-gray-400">R$ {campaign.goal.toLocaleString('pt-BR')}</span>
+                              <span className="text-gray-400">
+                                {hideValues 
+                                  ? "R$ •••••" 
+                                  : `R$ ${campaign.raised.toLocaleString('pt-BR')}`
+                                }
+                              </span>
+                              <span className="text-gray-400">
+                                {hideValues 
+                                  ? "R$ •••••" 
+                                  : `R$ ${campaign.goal.toLocaleString('pt-BR')}`
+                                }
+                              </span>
                             </div>
                           </div>
                           
