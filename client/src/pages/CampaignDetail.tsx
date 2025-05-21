@@ -403,9 +403,17 @@ export default function CampaignDetail() {
                   ) : (
                     <>
                       <div className="flex justify-between items-start mb-4">
-                        <h1 className="text-2xl md:text-3xl font-bold text-white break-words">
-                          {campaign.title}
-                        </h1>
+                        <div>
+                          <h1 className="text-2xl md:text-3xl font-bold text-white break-words">
+                            {campaign.title}
+                          </h1>
+                          <div className="flex items-center mt-2 text-sm text-gray-400">
+                            <span>Criado por </span>
+                            <span className="font-medium text-primary ml-1">
+                              {campaign.creator_name || "Usuário"}
+                            </span>
+                          </div>
+                        </div>
                         
                         {isOwner && (
                           <div className="flex space-x-2">
