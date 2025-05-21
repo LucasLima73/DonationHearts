@@ -15,7 +15,8 @@ import {
   Search,
   History,
   Filter,
-  ChevronRight
+  ChevronRight,
+  PlusCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
@@ -29,6 +30,13 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [showNewAchievement, setShowNewAchievement] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Para demonstração do tour de onboarding
+  const resetOnboarding = () => {
+    localStorage.removeItem('doeaqui-onboarding-completed');
+    localStorage.removeItem('doeaqui-onboarding-dismissed');
+    window.location.reload();
+  };
   
   // Redirecionar se não estiver autenticado
   useEffect(() => {
@@ -341,6 +349,19 @@ export default function Dashboard() {
               <UserLevel totalPoints={mockUserPoints} />
             </motion.div>
             
+            {/* Botão de criar campanha */}
+            <div className="mb-6 flex justify-end">
+              <Button 
+                id="create-campaign-button"
+                variant="default" 
+                size="default"
+                className="bg-primary hover:bg-primary/90"
+              >
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Nova Campanha
+              </Button>
+            </div>
+              
             {/* Abas de conteúdo */}
             <motion.div
               initial={{ opacity: 0 }}
