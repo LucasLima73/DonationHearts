@@ -22,6 +22,7 @@ import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
 import { predefinedAchievements } from '@shared/achievements';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
+import { OnboardingController } from '@/components/onboarding/OnboardingController';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -134,11 +135,16 @@ export default function Dashboard() {
         />
       </Helmet>
       
+      {/* Controlador do tour de onboarding */}
+      <OnboardingController />
+      
       {/* Header */}
       <DashboardHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       
       {/* Sidebar */}
-      <DashboardSidebar sidebarOpen={sidebarOpen} />
+      <div id="sidebar-nav">
+        <DashboardSidebar sidebarOpen={sidebarOpen} />
+      </div>
       
       {/* Main Content */}
       <div className="min-h-screen grid-background pt-16 w-full">
@@ -156,6 +162,7 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="mb-8"
+              id="dashboard-welcome"
             >
               <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
                 Olá, {user?.name || 'Doador'}! 👋
@@ -167,7 +174,7 @@ export default function Dashboard() {
             
             {/* Cards de estatísticas */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4" id="donations-made-section">
                 <h2 className="text-xl font-bold text-white">Minhas Doações</h2>
               </div>
               
