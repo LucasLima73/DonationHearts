@@ -99,9 +99,9 @@ export default function MyCampaigns() {
   
   // Calcular dias restantes
   const getDaysLeft = (campaign: Campaign) => {
-    if (!campaign.endDate) return null;
+    if (!campaign.end_date) return null;
     
-    const endDate = new Date(campaign.endDate);
+    const endDate = new Date(campaign.end_date);
     const today = new Date();
     
     const diffTime = endDate.getTime() - today.getTime();
@@ -261,7 +261,7 @@ export default function MyCampaigns() {
                       >
                         <div className="relative h-48">
                           <img 
-                            src={campaign.imageUrl || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
+                            src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                             alt={campaign.title}
                             className="w-full h-full object-cover"
                           />

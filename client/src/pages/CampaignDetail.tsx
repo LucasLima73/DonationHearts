@@ -63,7 +63,7 @@ export default function CampaignDetail() {
         setCampaign(data as Campaign);
         
         // Verificar se o usuário logado é o proprietário da campanha
-        if (user?.id && data.userId === user.id) {
+        if (user?.id && data.user_id === user.id) {
           setIsOwner(true);
         }
       } catch (err: any) {
@@ -184,8 +184,8 @@ export default function CampaignDetail() {
         .from('donations')
         .insert({
           amount: donationAmount,
-          campaignId: campaign.id,
-          userId: user.id,
+          campaign_id: campaign.id,
+          user_id: user.id,
           anonymous: false
         });
       
@@ -239,9 +239,9 @@ export default function CampaignDetail() {
   
   // Calcular dias restantes
   const getDaysLeft = () => {
-    if (!campaign || !campaign.endDate) return null;
+    if (!campaign || !campaign.end_date) return null;
     
-    const endDate = new Date(campaign.endDate);
+    const endDate = new Date(campaign.end_date);
     const today = new Date();
     
     const diffTime = endDate.getTime() - today.getTime();
@@ -329,7 +329,7 @@ export default function CampaignDetail() {
                 {/* Imagem principal */}
                 <div className="rounded-xl overflow-hidden mb-6 glass-card p-2 border border-white/5">
                   <img 
-                    src={campaign.imageUrl || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
+                    src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                     alt={campaign.title}
                     className="w-full h-[300px] md:h-[450px] object-cover rounded-lg"
                   />
@@ -574,7 +574,7 @@ export default function CampaignDetail() {
                       <div>
                         <span className="text-gray-400 text-sm block">Data de encerramento</span>
                         <span className="text-white">
-                          {campaign.endDate ? format(new Date(campaign.endDate), 'dd/MM/yyyy', { locale: ptBR }) : 'Não definida'}
+                          {campaign.end_date ? format(new Date(campaign.end_date), 'dd/MM/yyyy', { locale: ptBR }) : 'Não definida'}
                         </span>
                       </div>
                     </li>
