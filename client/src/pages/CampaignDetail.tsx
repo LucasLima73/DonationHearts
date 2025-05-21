@@ -421,6 +421,67 @@ export default function CampaignDetail() {
                           </p>
                         ))}
                       </div>
+                      
+                      {/* Visualização de Impacto Emocional - Antes e Depois */}
+                      {(campaign.before_story || campaign.after_story) && (
+                        <div className="mt-8 border-t border-white/10 pt-8">
+                          <h3 className="text-xl font-bold text-white mb-6">Impacto Emocional</h3>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Antes */}
+                            {campaign.before_story && (
+                              <div className="border border-white/10 rounded-xl p-4 bg-black/20 relative overflow-hidden">
+                                <div className="absolute -top-1 -right-1 bg-red-500/90 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                  ANTES
+                                </div>
+                                {campaign.before_image_url && (
+                                  <div className="mb-4 rounded-lg overflow-hidden">
+                                    <img 
+                                      src={campaign.before_image_url}
+                                      alt="Situação antes da campanha"
+                                      className="w-full h-48 object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <p className="text-gray-200 whitespace-pre-line">
+                                  {campaign.before_story}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Depois */}
+                            {campaign.after_story && (
+                              <div className="border border-white/10 rounded-xl p-4 bg-gradient-to-br from-green-900/40 to-emerald-900/20 relative overflow-hidden">
+                                <div className="absolute -top-1 -right-1 bg-green-500/90 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                  DEPOIS
+                                </div>
+                                {campaign.after_image_url && (
+                                  <div className="mb-4 rounded-lg overflow-hidden">
+                                    <img 
+                                      src={campaign.after_image_url}
+                                      alt="Resultado esperado da campanha"
+                                      className="w-full h-48 object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <p className="text-gray-200 whitespace-pre-line">
+                                  {campaign.after_story}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Descrição do Impacto */}
+                          {campaign.impact_description && (
+                            <div className="mt-6 p-4 border border-white/10 rounded-xl bg-purple-900/20">
+                              <h4 className="text-lg font-semibold text-white mb-2">O que vai mudar</h4>
+                              <p className="text-gray-200 whitespace-pre-line">
+                                {campaign.impact_description}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
