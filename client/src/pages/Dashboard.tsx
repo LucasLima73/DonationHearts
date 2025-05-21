@@ -16,7 +16,9 @@ import {
   History,
   Filter,
   ChevronRight,
-  PlusCircle
+  PlusCircle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
@@ -30,12 +32,18 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [showNewAchievement, setShowNewAchievement] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hideValues, setHideValues] = useState(false);
   
   // Para demonstração do tour de onboarding
   const resetOnboarding = () => {
     localStorage.removeItem('doeaqui-onboarding-completed');
     localStorage.removeItem('doeaqui-onboarding-dismissed');
     window.location.reload();
+  };
+  
+  // Toggle para mostrar/esconder valores
+  const toggleHideValues = () => {
+    setHideValues(!hideValues);
   };
   
   // Redirecionar se não estiver autenticado
@@ -184,6 +192,18 @@ export default function Dashboard() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4" id="donations-made-section">
                 <h2 className="text-xl font-bold text-white">Minhas Doações</h2>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleHideValues}
+                  className="hover:bg-white/5"
+                  title={hideValues ? "Mostrar valores" : "Esconder valores"}
+                >
+                  {hideValues ? 
+                    <EyeOff className="h-5 w-5 text-gray-400" /> : 
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  }
+                </Button>
               </div>
               
               <motion.div
@@ -241,7 +261,12 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-gray-400 text-sm">Total Doado</p>
-                      <h3 className="text-2xl font-bold text-white">R$ {mockTotalDonated.toFixed(2)}</h3>
+                      <h3 className="text-2xl font-bold text-white">
+                        {hideValues ? 
+                          "R$ ••••••" : 
+                          `R$ ${mockTotalDonated.toFixed(2)}`
+                        }
+                      </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
                       <TrendingUp className="h-6 w-6 text-accent" />
@@ -318,7 +343,12 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-gray-400 text-sm">Total Recebido</p>
-                      <h3 className="text-2xl font-bold text-white">R$ {mockTotalReceived.toFixed(2)}</h3>
+                      <h3 className="text-2xl font-bold text-white">
+                        {hideValues ? 
+                          "R$ ••••••" : 
+                          `R$ ${mockTotalReceived.toFixed(2)}`
+                        }
+                      </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
                       <TrendingUp className="h-6 w-6 text-blue-500" />
