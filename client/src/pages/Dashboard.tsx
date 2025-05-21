@@ -129,14 +129,14 @@ export default function Dashboard() {
         />
       </Helmet>
       
-      <div className="min-h-screen grid-background pt-20">
+      <div className="min-h-screen grid-background pt-20 w-full">
         {/* Efeitos de background */}
         <div className="absolute -z-10 top-0 right-0 w-full h-full overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 blur-[120px] rounded-full bg-primary/30 -mr-20 -mt-20"></div>
           <div className="absolute bottom-0 left-0 w-80 h-80 blur-[120px] rounded-full bg-secondary/30 -ml-20 -mb-20"></div>
         </div>
         
-        <div className="container px-4 py-8">
+        <div className="container mx-auto w-full max-w-[1200px] px-4 py-8">
           {/* Cabeçalho de boas-vindas */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
