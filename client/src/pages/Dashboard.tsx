@@ -32,7 +32,8 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [showNewAchievement, setShowNewAchievement] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [hideValues, setHideValues] = useState(false);
+  const [hideDonationValues, setHideDonationValues] = useState(false);
+  const [hideCampaignValues, setHideCampaignValues] = useState(false);
   
   // Para demonstração do tour de onboarding
   const resetOnboarding = () => {
@@ -41,9 +42,14 @@ export default function Dashboard() {
     window.location.reload();
   };
   
-  // Toggle para mostrar/esconder valores
-  const toggleHideValues = () => {
-    setHideValues(!hideValues);
+  // Toggle para mostrar/esconder valores de doações
+  const toggleHideDonationValues = () => {
+    setHideDonationValues(!hideDonationValues);
+  };
+  
+  // Toggle para mostrar/esconder valores de campanhas
+  const toggleHideCampaignValues = () => {
+    setHideCampaignValues(!hideCampaignValues);
   };
   
   // Redirecionar se não estiver autenticado
@@ -196,11 +202,11 @@ export default function Dashboard() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={toggleHideValues}
+                    onClick={toggleHideDonationValues}
                     className="h-8 w-8 p-0 hover:bg-white/5"
-                    title={hideValues ? "Mostrar valores" : "Esconder valores"}
+                    title={hideDonationValues ? "Mostrar valores" : "Esconder valores"}
                   >
-                    {hideValues ? 
+                    {hideDonationValues ? 
                       <EyeOff className="h-4 w-4 text-gray-400" /> : 
                       <Eye className="h-4 w-4 text-gray-400" />
                     }
@@ -264,7 +270,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-gray-400 text-sm">Total Doado</p>
                       <h3 className="text-2xl font-bold text-white">
-                        {hideValues ? 
+                        {hideDonationValues ? 
                           "R$ ••••••" : 
                           `R$ ${mockTotalDonated.toFixed(2)}`
                         }
@@ -293,11 +299,11 @@ export default function Dashboard() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={toggleHideValues}
+                    onClick={toggleHideCampaignValues}
                     className="h-8 w-8 p-0 hover:bg-white/5"
-                    title={hideValues ? "Mostrar valores" : "Esconder valores"}
+                    title={hideCampaignValues ? "Mostrar valores" : "Esconder valores"}
                   >
-                    {hideValues ? 
+                    {hideCampaignValues ? 
                       <EyeOff className="h-4 w-4 text-gray-400" /> : 
                       <Eye className="h-4 w-4 text-gray-400" />
                     }
@@ -360,7 +366,7 @@ export default function Dashboard() {
                     <div>
                       <p className="text-gray-400 text-sm">Total Recebido</p>
                       <h3 className="text-2xl font-bold text-white">
-                        {hideValues ? 
+                        {hideCampaignValues ? 
                           "R$ ••••••" : 
                           `R$ ${mockTotalReceived.toFixed(2)}`
                         }
@@ -480,13 +486,13 @@ export default function Dashboard() {
                             </div>
                             <div className="flex justify-between mt-2 text-sm">
                               <span className="text-gray-400">
-                                {hideValues 
+                                {hideCampaignValues 
                                   ? "R$ •••••" 
                                   : `R$ ${campaign.raised.toLocaleString('pt-BR')}`
                                 }
                               </span>
                               <span className="text-gray-400">
-                                {hideValues 
+                                {hideCampaignValues 
                                   ? "R$ •••••" 
                                   : `R$ ${campaign.goal.toLocaleString('pt-BR')}`
                                 }
