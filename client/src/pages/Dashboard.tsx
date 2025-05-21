@@ -40,6 +40,8 @@ export default function Dashboard() {
   const mockUserPoints = 750;
   const mockDonationCount = 8;
   const mockTotalDonated = 1250;
+  const mockTotalReceived = 2750;
+  const mockReceivedDonationCount = 12;
   
   // Campanhas recentes de exemplo
   const recentCampaigns = [
@@ -164,79 +166,162 @@ export default function Dashboard() {
             </motion.div>
             
             {/* Cards de estatísticas */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10"
-            >
-              <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Total de Pontos</p>
-                    <h3 className="text-2xl font-bold text-white">{mockUserPoints}</h3>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Award className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs border-primary/20 text-primary hover:bg-primary/10"
-                    onClick={() => setLocation('/perfil')}
-                  >
-                    Ver conquistas
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
-                </div>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">Minhas Doações</h2>
               </div>
               
-              <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Doações Realizadas</p>
-                    <h3 className="text-2xl font-bold text-white">{mockDonationCount}</h3>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8"
+              >
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total de Pontos</p>
+                      <h3 className="text-2xl font-bold text-white">{mockUserPoints}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Award className="h-6 w-6 text-primary" />
+                    </div>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                    <HeartIcon className="h-6 w-6 text-secondary" />
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-primary/20 text-primary hover:bg-primary/10"
+                      onClick={() => setLocation('/perfil')}
+                    >
+                      Ver conquistas
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs border-secondary/20 text-secondary hover:bg-secondary/10"
-                  >
-                    Ver histórico
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
+                
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Doações Realizadas</p>
+                      <h3 className="text-2xl font-bold text-white">{mockDonationCount}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center">
+                      <HeartIcon className="h-6 w-6 text-secondary" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-secondary/20 text-secondary hover:bg-secondary/10"
+                    >
+                      Ver histórico
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
                 </div>
+                
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total Doado</p>
+                      <h3 className="text-2xl font-bold text-white">R$ {mockTotalDonated.toFixed(2)}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-accent" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-accent/20 text-accent hover:bg-accent/10"
+                    >
+                      Ver impacto
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+              
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">Minhas Campanhas</h2>
               </div>
               
-              <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Total Doado</p>
-                    <h3 className="text-2xl font-bold text-white">R$ {mockTotalDonated.toFixed(2)}</h3>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10"
+              >
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Campanhas Criadas</p>
+                      <h3 className="text-2xl font-bold text-white">3</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-green-500" />
+                    </div>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-accent" />
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-green-500/20 text-green-500 hover:bg-green-500/10"
+                    >
+                      Gerenciar campanhas
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs border-accent/20 text-accent hover:bg-accent/10"
-                  >
-                    Ver impacto
-                    <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
+                
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Doações Recebidas</p>
+                      <h3 className="text-2xl font-bold text-white">{mockReceivedDonationCount}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                      <User className="h-6 w-6 text-purple-500" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-purple-500/20 text-purple-500 hover:bg-purple-500/10"
+                    >
+                      Ver doadores
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+                
+                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total Recebido</p>
+                      <h3 className="text-2xl font-bold text-white">R$ {mockTotalReceived.toFixed(2)}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-blue-500" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs border-blue-500/20 text-blue-500 hover:bg-blue-500/10"
+                    >
+                      Ver detalhes
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
             
             {/* Progresso de nível */}
             <motion.div
