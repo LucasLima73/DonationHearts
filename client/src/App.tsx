@@ -9,16 +9,82 @@ import DetailPage from "@/pages/DetailPage";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import UserProfile from "@/pages/UserProfile";
+import Dashboard from "@/pages/Dashboard";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
+
+// Componente para redirecionar usuários autenticados para o dashboard
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+  
+  useEffect(() => {
+    if (!isLoading && user) {
+      setLocation('/dashboard');
+    }
+  }, [user, isLoading, setLocation]);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen grid place-items-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Se já estiver autenticado, não renderiza nada (o redirect acontece no useEffect)
+  if (user) {
+    return null;
+  }
+  
+  return <>{children}</>;
+}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/">
+        {() => (
+          <PublicRoute>
+            <Home />
+          </PublicRoute>
+        )}
+      </Route>
       <Route path="/detalhes/:id" component={DetailPage} />
-      <Route path="/register" component={Register} />
-      <Route path="/login" component={Login} />
-      <Route path="/perfil" component={UserProfile} />
+      <Route path="/register">
+        {() => (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        )}
+      </Route>
+      <Route path="/login">
+        {() => (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        )}
+      </Route>
+      <Route path="/dashboard">
+        {() => (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/perfil">
+        {() => (
+          <ProtectedRoute>
+            <UserProfile />
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
