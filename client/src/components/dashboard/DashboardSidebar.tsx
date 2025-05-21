@@ -159,21 +159,31 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
               variant="default"
               size="sm"
               className="w-full justify-start bg-primary hover:bg-primary/90 btn-glow"
-              onClick={() => setLocation('/dashboard/nova-campanha')}
+              onClick={() => setLocation('/nova-campanha')}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Nova Campanha
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start mt-3 border-white/10 hover:bg-white/5"
+              onClick={() => setLocation('/')}
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Voltar para o site
             </Button>
           </div>
         </div>
       </motion.aside>
       
-      {/* Sidebar desktop */}
+      {/* Sidebar para desktop */}
       <aside className={cn(
-        "hidden lg:flex h-screen w-64 flex-col fixed top-0 left-0 bg-background border-r border-white/10 z-20",
+        "hidden lg:block fixed inset-y-0 left-0 z-10 w-64 border-r border-white/10 bg-background transition-all duration-300 pt-16", 
         className
       )}>
-        <div className="flex flex-col h-full pt-16">
+        <div className="flex flex-col h-full">
           <div className="flex items-center justify-between py-4 px-5 border-b border-white/10">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
@@ -186,8 +196,8 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
                 )}
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-white truncate max-w-[120px]">{user?.name || 'Usuário'}</p>
-                <p className="text-xs text-gray-400 truncate max-w-[120px]">{user?.email}</p>
+                <p className="text-sm font-medium text-white truncate max-w-[150px]">{user?.name || 'Usuário'}</p>
+                <p className="text-xs text-gray-400 truncate max-w-[150px]">{user?.email}</p>
               </div>
             </div>
           </div>
@@ -226,7 +236,7 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
               variant="default"
               size="sm"
               className="w-full justify-start bg-primary hover:bg-primary/90 btn-glow"
-              onClick={() => setLocation('/dashboard/nova-campanha')}
+              onClick={() => setLocation('/nova-campanha')}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Nova Campanha
