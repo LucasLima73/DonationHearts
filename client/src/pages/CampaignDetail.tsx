@@ -52,6 +52,7 @@ export default function CampaignDetail() {
         setIsLoading(true);
         setError(null);
         
+        // Buscar detalhes da campanha
         const { data, error } = await supabase
           .from('campaigns')
           .select('*')
@@ -65,6 +66,23 @@ export default function CampaignDetail() {
         // Verificar se o usuário logado é o proprietário da campanha
         if (user?.id && data.user_id === user.id) {
           setIsOwner(true);
+        }
+        
+        // Buscar informações do criador da campanha
+        if (data.user_id) {
+          const { data: userData, error: userError } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', data.user_id)
+            .single();
+            
+          if (!userError && userData) {
+            // Atualizar os dados da campanha com o nome do criador
+            setCampaign(prev => ({
+              ...prev as Campaign,
+              creator_name: userData.name
+            } as Campaign));
+          }
         }
       } catch (err: any) {
         console.error('Erro ao carregar campanha:', err);

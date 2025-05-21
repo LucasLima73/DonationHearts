@@ -47,7 +47,9 @@ export const insertDonationSchema = createInsertSchema(donations).omit({
 });
 
 // Tipos de inferência para uso no front-end
-export type Campaign = InferSelectModel<typeof campaigns>;
+export type Campaign = InferSelectModel<typeof campaigns> & {
+  creator_name?: string; // Campo adicional para armazenar o nome do criador
+};
 export type Donation = InferSelectModel<typeof donations>;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type InsertDonation = z.infer<typeof insertDonationSchema>;

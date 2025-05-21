@@ -78,13 +78,35 @@ export default function Register() {
       
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: "Você será redirecionado para a página inicial.",
+        description: "Verifique seu email para confirmar o cadastro antes de fazer login.",
+        duration: 6000
       });
       
-      // Redirecionar para a home após cadastro bem-sucedido
+      // Mostrar mensagem de confirmação
+      setIsSubmitting(false);
+      
+      // Criar div com mensagem de verificação de email
+      const emailVerificationMessage = document.createElement("div");
+      emailVerificationMessage.innerHTML = `
+        <div class="mt-6 p-4 rounded-lg bg-blue-500/20 border border-blue-500/30 text-white">
+          <h3 class="text-lg font-semibold mb-2">Verifique seu email</h3>
+          <p class="text-sm text-gray-200">
+            Enviamos um link de confirmação para <strong>${data.email}</strong>.<br>
+            Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login.
+          </p>
+        </div>
+      `;
+      
+      // Adicionar mensagem ao DOM
+      const formElement = document.querySelector("form");
+      if (formElement) {
+        formElement.appendChild(emailVerificationMessage);
+      }
+      
+      // Redirecionar para a home após alguns segundos
       setTimeout(() => {
         setLocation("/login");
-      }, 2000);
+      }, 8000);
       
     } catch (error: any) {
       console.error("Erro ao registrar:", error);
