@@ -33,10 +33,16 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
       active: location === '/dashboard'
     },
     { 
-      title: 'Campanhas', 
+      title: 'Todas Campanhas', 
+      icon: Users, 
+      href: '/todas-campanhas',
+      active: location === '/todas-campanhas'
+    },
+    { 
+      title: 'Minhas Campanhas', 
       icon: Heart, 
-      href: '/campanhas',
-      active: location.includes('/campanhas')
+      href: '/minhas-campanhas',
+      active: location === '/minhas-campanhas' || (location.includes('/campanhas/') && !location.includes('/todas-campanhas'))
     },
     { 
       title: 'Conquistas', 

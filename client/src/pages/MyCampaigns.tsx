@@ -47,8 +47,8 @@ export default function MyCampaigns() {
         const { data, error } = await supabase
           .from('campaigns')
           .select('*')
-          .eq('userId', user.id)
-          .order('createdAt', { ascending: false });
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
         
         if (error) throw error;
         

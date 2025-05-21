@@ -13,6 +13,7 @@ import Dashboard from "@/pages/Dashboard";
 import NewCampaign from "@/pages/NewCampaign";
 import CampaignDetail from "@/pages/CampaignDetail";
 import MyCampaigns from "@/pages/MyCampaigns";
+import AllCampaigns from "@/pages/AllCampaigns";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -95,7 +96,14 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
-      <Route path="/campanhas">
+      <Route path="/todas-campanhas">
+        {() => (
+          <ProtectedRoute>
+            <AllCampaigns />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/minhas-campanhas">
         {() => (
           <ProtectedRoute>
             <MyCampaigns />
