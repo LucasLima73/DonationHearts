@@ -117,13 +117,34 @@ export default function NewCampaign() {
     setIsSubmitting(true);
     
     try {
-      // Aqui fariamos uma chamada para a API para criar a campanha
+      // Salvando a campanha no banco de dados Supabase
       console.log('Dados da campanha:', data);
       
-      // Simular um atraso para mostrar o estado de loading
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Inserir a campanha na tabela campaigns
+      const { data: campaignData, error } = await supabase
+        .from('campaigns')
+        .insert([{
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          goal: data.goal,
+          raised: 0,
+          image_url: data.image_url,
+          end_date: data.end_date,
+          user_id: user.id,
+          status: 'active',
+          before_story: data.before_story,
+          after_story: data.after_story,
+          before_image_url: data.before_image_url,
+          after_image_url: data.after_image_url,
+          impact_description: data.impact_description
+        }])
+        .select();
       
-      // Simular sucesso
+      if (error) {
+        throw new Error(error.message);
+      }
+      
       toast({
         title: "Campanha criada com sucesso!",
         description: "Sua campanha foi criada e estará disponível para receber doações",
