@@ -1,13 +1,25 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Trophy, User, LogOut } from "lucide-react";
 import Logo from "./Logo";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, signOut, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +36,11 @@ export default function Header() {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+  
+  const handleSignOut = async () => {
+    await signOut();
+    setLocation("/");
   };
 
   return (
