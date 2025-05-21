@@ -15,7 +15,12 @@ export const campaigns = pgTable('campaigns', {
   created_at: timestamp('created_at').defaultNow(),
   end_date: timestamp('end_date'),
   user_id: uuid('user_id').notNull(),
-  status: text('status').default('active') // active, completed, canceled
+  status: text('status').default('active'), // active, completed, canceled
+  before_story: text('before_story'),
+  after_story: text('after_story'),
+  before_image_url: text('before_image_url'),
+  after_image_url: text('after_image_url'),
+  impact_description: text('impact_description')
 });
 
 // Tabela de doações

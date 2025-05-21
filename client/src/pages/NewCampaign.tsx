@@ -15,6 +15,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { 
   Form, 
@@ -363,7 +364,7 @@ export default function NewCampaign() {
                       name="image_url"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">Imagem da campanha</FormLabel>
+                          <FormLabel className="text-white">Imagem principal da campanha</FormLabel>
                           <div className="glass-card rounded-xl overflow-hidden border border-white/5">
                             <div className="p-4">
                               <div className={cn(
