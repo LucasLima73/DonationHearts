@@ -75,18 +75,12 @@ export default function UserProfile() {
         if (levelError) {
           console.error('Erro ao buscar nível do usuário:', levelError);
           
-          if (levelError.code === '42P01' || levelError.message?.includes('does not exist')) {
-            // Tabela não existe, configurar dados padrão
-            await handleGamificationData();
-            setIsLoading(false);
-            return; // Interromper a execução para não continuar com outras consultas
-          } else if (levelError.code !== 'PGRST116') {
-            toast({
-              title: "Erro ao carregar dados",
-              description: "Não foi possível carregar o nível do usuário",
-              variant: "destructive"
-            });
-          }
+          // Se houver qualquer erro (incluindo tabela não existente),
+          // configuramos dados padrão para manter a interface funcionando
+          console.log('Erro ao buscar dados do usuário, usando valores padrão');
+          await handleGamificationData();
+          setIsLoading(false);
+          return; // Interromper a execução para não continuar com outras consultas
         }
         
         // Se o usuário não tem nível registrado, cria um nível inicial
