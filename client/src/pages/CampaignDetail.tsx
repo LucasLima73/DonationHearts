@@ -33,6 +33,7 @@ import confetti from 'canvas-confetti';
 import { StripeProvider } from '@/components/payment/StripeProvider';
 import { StripeCheckout } from '@/components/payment/StripeCheckout';
 import { apiRequest } from '@/lib/queryClient';
+import { QuickDonationPanel } from '@/components/donation/QuickDonationPanel';
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -587,6 +588,16 @@ export default function CampaignDetail() {
                   </div>
                   
                   <div className="space-y-4">
+                    {/* Componente de Micro-doação com animação */}
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-300 mb-2">Doações rápidas</h4>
+                      <QuickDonationPanel 
+                        campaignId={campaign.id}
+                        campaignName={campaign.title}
+                        variant="minimal"
+                      />
+                    </div>
+                    
                     {/* Botão de doação */}
                     <Dialog>
                       <DialogTrigger asChild>
