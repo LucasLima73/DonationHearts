@@ -76,43 +76,24 @@ export function MicroDonationButton({
       }
 
       const paymentData = await response.json();
-
-      // Simulando o processo de pagamento (em produção, aqui iria o fluxo completo do Stripe)
-      // Em um ambiente real, redirecionar para a página de checkout ou abrir modal de pagamento
       
-      // 2. Registrar a doação no banco de dados
-      const { error: donationError } = await supabase
-        .from('donations')
-        .insert({
-          amount,
-          campaign_id: campaignId,
-          user_id: user.id,
-          anonymous: false
-        });
+      // 2. Registrar a doação e atribuir pontos
+      const registerResponse = await apiRequest('POST', '/api/register-donation', {
+        paymentIntentId: paymentData.clientSecret.split('_secret_')[0],
+        userId: user.id,
+        campaignId,
+        amount,
+        anonymous: false
+      });
       
-      if (donationError) throw donationError;
+      if (!registerResponse.ok) {
+        const errorData = await registerResponse.json();
+        throw new Error(errorData.message || 'Erro ao registrar doação');
+      }
       
-      // 3. Atualizar valor arrecadado na campanha
-      const { data: campaignData, error: campaignQueryError } = await supabase
-        .from('campaigns')
-        .select('raised')
-        .eq('id', campaignId)
-        .single();
+      const donationResult = await registerResponse.json();
       
-      if (campaignQueryError) throw campaignQueryError;
-      
-      const currentRaised = campaignData.raised || 0;
-      
-      const { error: updateError } = await supabase
-        .from('campaigns')
-        .update({ 
-          raised: currentRaised + amount
-        })
-        .eq('id', campaignId);
-      
-      if (updateError) throw updateError;
-
-      // 4. Mostrar animação de sucesso
+      // 3. Mostrar animação de sucesso
       setIsSuccess(true);
       triggerConfetti();
       
@@ -123,7 +104,7 @@ export function MicroDonationButton({
       
       toast({
         title: 'Doação realizada!',
-        description: `Sua doação de R$ ${amount.toFixed(2)} foi realizada com sucesso!`,
+        description: `Sua doação de R$ ${amount.toFixed(2)} foi realizada com sucesso! (+${donationResult.points || 50} pontos)`,
       });
       
       // Resetar estado após animação

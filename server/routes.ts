@@ -208,12 +208,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         created_at: new Date().toISOString()
       };
       
+      // Inserir a doação no banco de dados
+      const { data: donation, error: donationError } = await supabase
+        .from('donations')
+        .insert(donationData)
+        .select()
+        .single();
+      
+      if (donationError) {
+        console.error("Erro ao inserir doação:", donationError);
+        return res.status(500).json({ error: "Erro ao registrar doação no banco de dados" });
+      }
+      
       // Atualizar o valor arrecadado na campanha
-      // Isso será feito através da conexão com o banco de dados
+      const { data: campaign, error: campaignError } = await supabase
+        .from('campaigns')
+        .select('raised, creator_id')
+        .eq('id', campaignId)
+        .single();
+      
+      if (!campaignError && campaign) {
+        const newRaisedAmount = (campaign.raised || 0) + parseFloat(amount);
+        
+        await supabase
+          .from('campaigns')
+          .update({ raised: newRaisedAmount })
+          .eq('id', campaignId);
+          
+        // Atribuir pontos ao doador (50 pontos por doação)
+        if (userId) {
+          await updateUserPoints(
+            userId,
+            50,
+            'donation',
+            `Você fez uma doação de R$${parseFloat(amount).toFixed(2)}`
+          );
+        }
+        
+        // Atribuir pontos ao criador da campanha (20 pontos por doação recebida)
+        if (campaign.creator_id && campaign.creator_id !== userId) {
+          await updateUserPoints(
+            campaign.creator_id,
+            20,
+            'donation',
+            `Você recebeu uma doação de R$${parseFloat(amount).toFixed(2)} em sua campanha`
+          );
+        }
+      } else if (campaignError) {
+        console.error("Erro ao buscar campanha:", campaignError);
+      }
       
       res.json({ 
         success: true,
-        donation: donationData
+        donation: donation || donationData,
+        points: userId ? 50 : 0
       });
     } catch (error: any) {
       console.error("Erro ao registrar doação:", error);
