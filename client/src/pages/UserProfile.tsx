@@ -332,17 +332,19 @@ export default function UserProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Total de Pontos</h3>
-                    <p className="text-xl font-bold text-white">{userPoints}</p>
+                    <p className="text-xl font-bold text-white">{isLoading ? "..." : userPoints}</p>
                   </div>
                   
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Campanhas Apoiadas</h3>
-                    <p className="text-xl font-bold text-white">{donationCount}</p>
+                    <p className="text-xl font-bold text-white">{isLoading ? "..." : donationCount}</p>
                   </div>
                   
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Total Doado</h3>
-                    <p className="text-xl font-bold text-white">R$ {totalDonated.toFixed(2)}</p>
+                    <p className="text-xl font-bold text-white">
+                      {isLoading ? "..." : `R$ ${totalDonated.toFixed(2)}`}
+                    </p>
                   </div>
                 </div>
               </div>

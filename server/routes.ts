@@ -16,9 +16,14 @@ if (!process.env.DATABASE_URL) {
   throw new Error('Missing required database URL: DATABASE_URL');
 }
 
-// Criar cliente Supabase com a URL de conexão
-const supabaseUrl = 'https://api.supabase.com';
-const supabaseKey = process.env.DATABASE_URL;
+// Importar as configurações do ambiente do cliente
+import { env } from '../client/src/lib/env';
+
+// Usar os valores de URL e chave do Supabase do arquivo de configuração
+const supabaseUrl = env.supabase.url;
+const supabaseKey = env.supabase.anonKey;
+
+// Criar cliente Supabase para interagir com o banco de dados
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Funções auxiliares para gerenciar pontos e níveis
