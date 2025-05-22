@@ -122,13 +122,13 @@ export default function NewCampaign() {
         throw uploadError;
       }
       
-      // Obter a URL pública da imagem
-      const { data: urlData } = supabase.storage
+      // Obter a URL assinada da imagem (com /sign no caminho)
+      const { data: urlData } = await supabase.storage
         .from('campaign-images')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365); // URL válida por 1 ano
       
-      if (urlData) {
-        form.setValue('image_url', urlData.publicUrl);
+      if (urlData && urlData.signedUrl) {
+        form.setValue('image_url', urlData.signedUrl);
         toast({
           title: "Upload concluído",
           description: "Imagem carregada com sucesso!",
