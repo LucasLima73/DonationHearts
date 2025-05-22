@@ -19,6 +19,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
+import { setupGameTables } from "./utils/setupGameTables";
 
 // Componente para redirecionar usuários autenticados para o dashboard
 function PublicRoute({ children }: { children: React.ReactNode }) {
@@ -121,6 +122,21 @@ function Router() {
 }
 
 function App() {
+  // Inicializar tabelas do sistema de gamificação quando o aplicativo iniciar
+  useEffect(() => {
+    setupGameTables()
+      .then(success => {
+        if (success) {
+          console.log('✅ Sistema de gamificação inicializado com sucesso');
+        } else {
+          console.warn('⚠️ O sistema de gamificação pode não estar totalmente configurado');
+        }
+      })
+      .catch(error => {
+        console.error('❌ Erro ao inicializar sistema de gamificação:', error);
+      });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
