@@ -131,63 +131,108 @@ export default function UserProfile() {
         }
       }
       
-      // 3. Buscar ou criar histórico de atividades
-      // Primeiro verificar se já existe histórico
-      const { data: existingHistory, error: historyError } = await supabase
-        .from('points_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // 3. Criar histórico de atividades diretamente das doações
+      console.log('Gerando histórico a partir das doações do usuário');
       
-      if (!historyError && existingHistory && existingHistory.length > 0) {
-        // Usar histórico existente
-        console.log('Histórico encontrado:', existingHistory.length);
-        const formattedHistory = existingHistory.map(item => ({
-          id: item.id,
-          date: new Date(item.created_at),
-          action: item.description,
-          points: item.amount,
-          category: item.category
-        }));
-        
-        setActivityHistory(formattedHistory);
-      } else if (donations.length > 0) {
-        // Criar histórico a partir das doações
+      // Usar doações como fonte primária do histórico
+      if (donations.length > 0) {
+        // Mapear doações para o formato de histórico
         const activityItems = donations.map((donation, index) => ({
-          id: index + 1,
+          id: donation.id || index + 1,
           date: new Date(donation.created_at),
           action: `Doação de R$ ${(donation.amount / 100).toFixed(2)}`,
-          points: 50,
-          category: 'donation'
+          points: 50, // Cada doação vale 50 pontos
+          category: 'donation',
+          // Adicionar campos extras para exibição
+          amount: donation.amount / 100,
+          campaign_id: donation.campaign_id
         }));
         
-        console.log('Histórico gerado:', activityItems.length);
+        // Ordenar por data (mais recente primeiro)
+        activityItems.sort((a, b) => b.date.getTime() - a.date.getTime());
+        
+        console.log('Histórico de doações gerado:', activityItems);
         setActivityHistory(activityItems);
         
-        // Tentar inserir no banco
+        // Tentar buscar informações adicionais sobre as campanhas para exibição
         try {
-          const historyRecords = donations.map(donation => ({
-            user_id: user.id,
-            amount: 50,
-            category: 'donation',
-            description: `Doação de R$ ${(donation.amount / 100).toFixed(2)}`,
-            created_at: donation.created_at
-          }));
+          // Buscar nomes das campanhas para as quais o usuário doou
+          const campaignIds = [...new Set(donations.map(d => d.campaign_id))]; // IDs únicos
           
-          const { error: insertError } = await supabase
-            .from('points_history')
-            .insert(historyRecords);
-            
-          if (insertError) {
-            console.error('Erro ao inserir histórico:', insertError);
+          if (campaignIds.length > 0) {
+            const { data: campaignsData } = await supabase
+              .from('campaigns')
+              .select('id, title')
+              .in('id', campaignIds);
+              
+            if (campaignsData && campaignsData.length > 0) {
+              // Criar um mapa de IDs para nomes de campanhas
+              const campaignMap = new Map();
+              campaignsData.forEach(c => campaignMap.set(c.id, c.title));
+              
+              // Atualizar histórico com nomes de campanhas
+              const enhancedHistory = activityItems.map(item => {
+                const campaignTitle = campaignMap.get(item.campaign_id) || 'Campanha';
+                return {
+                  ...item,
+                  action: `Doação de R$ ${item.amount.toFixed(2)} para ${campaignTitle}`
+                };
+              });
+              
+              setActivityHistory(enhancedHistory);
+            }
           }
         } catch (e) {
-          console.error('Erro ao criar histórico:', e);
+          console.error('Erro ao buscar detalhes das campanhas:', e);
+          // Mantém o histórico básico mesmo sem os nomes das campanhas
+        }
+        
+        // Verificar se precisamos criar registros no histórico de pontos
+        const { data: existingHistory } = await supabase
+          .from('points_history')
+          .select('count(*)')
+          .eq('user_id', user.id);
+          
+        if (!existingHistory || existingHistory.length === 0) {
+          try {
+            // Criar registros de histórico no banco
+            const historyRecords = donations.map(donation => ({
+              user_id: user.id,
+              amount: 50, // 50 pontos por doação
+              category: 'donation',
+              description: `Doação de R$ ${(donation.amount / 100).toFixed(2)}`,
+              created_at: donation.created_at
+            }));
+            
+            await supabase
+              .from('points_history')
+              .insert(historyRecords);
+          } catch (e) {
+            console.error('Erro ao inserir histórico de pontos:', e);
+          }
         }
       } else {
-        // Sem doações, histórico vazio
-        setActivityHistory([]);
+        // Sem doações, tentar buscar histórico existente
+        const { data: existingHistory } = await supabase
+          .from('points_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+          
+        if (existingHistory && existingHistory.length > 0) {
+          const formattedHistory = existingHistory.map(item => ({
+            id: item.id,
+            date: new Date(item.created_at),
+            action: item.description,
+            points: item.amount,
+            category: item.category
+          }));
+          
+          setActivityHistory(formattedHistory);
+        } else {
+          // Realmente não há histórico
+          setActivityHistory([]);
+        }
       }
       
       // 4. Verificar conquistas
@@ -517,15 +562,25 @@ export default function UserProfile() {
                               <h4 className="font-medium">{activity.action}</h4>
                               <Badge variant="outline">+{activity.points} pts</Badge>
                             </div>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {activity.date.toLocaleDateString('pt-BR', { 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
+                            <div className="mt-1 flex items-center justify-between">
+                              <p className="text-sm text-muted-foreground">
+                                {activity.date.toLocaleDateString('pt-BR', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric'
+                                })}
+                                {' '}
+                                {activity.date.toLocaleTimeString('pt-BR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                              {activity.amount && (
+                                <p className="text-sm font-semibold text-primary">
+                                  R$ {activity.amount.toFixed(2)}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
