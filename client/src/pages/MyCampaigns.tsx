@@ -264,6 +264,10 @@ export default function MyCampaigns() {
                             src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                             alt={campaign.title}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.log('Erro ao carregar imagem:', campaign.image_url);
+                              e.currentTarget.src = 'https://placehold.co/800x450/2a2a2a/ffffff?text=Imagem+Indisponível';
+                            }}
                           />
                           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
                             {campaign.category}

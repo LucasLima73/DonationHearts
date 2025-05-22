@@ -394,6 +394,10 @@ export default function CampaignDetail() {
                     src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                     alt={campaign.title}
                     className="w-full h-[300px] md:h-[450px] object-cover rounded-lg"
+                    onError={(e) => {
+                      console.log('Erro ao carregar imagem na página de detalhes:', campaign.image_url);
+                      e.currentTarget.src = 'https://placehold.co/800x450/2a2a2a/ffffff?text=Imagem+Indisponível';
+                    }}
                   />
                 </div>
                 
