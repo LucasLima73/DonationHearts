@@ -14,7 +14,6 @@ import { UserLevel } from '@/components/gamification/UserLevel';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { predefinedAchievements } from '@shared/achievements';
-import { createGamificationTables } from '@/migrations/createGameTables';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UserProfile() {
@@ -228,10 +227,7 @@ export default function UserProfile() {
       setIsLoading(true);
       
       try {
-        // Tentar criar as tabelas necessárias
-        await createGamificationTables();
-        
-        // Buscar dados do usuário do banco de dados
+        // Buscar dados do usuário do banco de dados diretamente
         await fetchUserGamificationData();
       } catch (error) {
         console.error('Erro ao carregar dados do usuário:', error);
