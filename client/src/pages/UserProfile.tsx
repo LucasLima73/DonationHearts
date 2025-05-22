@@ -21,60 +21,234 @@ import {
 
 export default function UserProfile() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showDemo, setShowDemo] = useState(false);
   const [selectedAchievement, setSelectedAchievement] = useState<number | null>(null);
   
-  // Dados simulados para demonstração
-  const mockUserPoints = 750;
-  const mockDonationCount = 8;
-  const mockTotalDonated = 1250;
+  // Estados para armazenar dados reais do usuário
+  const [userPoints, setUserPoints] = useState(0);
+  const [donationCount, setDonationCount] = useState(0);
+  const [totalDonated, setTotalDonated] = useState(0);
+  const [userLevel, setUserLevel] = useState({ level: 1, progress: 0, totalPoints: 0 });
+  const [userAchievements, setUserAchievements] = useState<any[]>([]);
+  const [activityHistory, setActivityHistory] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Simulação de conquistas do usuário para demonstração
-  const mockUserAchievements = [
-    { id: 1, userId: user?.id || '1', achievementId: 1, unlockedAt: new Date().toISOString(), progress: 1 },
-    { id: 2, userId: user?.id || '1', achievementId: 2, unlockedAt: new Date().toISOString(), progress: 5 },
-    { id: 3, userId: user?.id || '1', achievementId: 4, unlockedAt: new Date().toISOString(), progress: 1 },
-    { id: 4, userId: user?.id || '1', achievementId: 6, unlockedAt: new Date().toISOString(), progress: 1 }
-  ];
-  
-  // Simulação do histórico de atividades para demonstração
-  const mockActivityHistory = [
-    { 
-      id: 1, 
-      type: 'donation', 
-      description: 'Você doou R$150 para "Ajude Maria a custear seu tratamento"', 
-      points: 30, 
-      date: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() // 2 horas atrás
-    },
-    { 
-      id: 2, 
-      type: 'achievement', 
-      description: 'Você desbloqueou a conquista "Coração Generoso"', 
-      points: 50, 
-      date: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() // 5 horas atrás
-    },
-    { 
-      id: 3, 
-      type: 'sharing', 
-      description: 'Você compartilhou a campanha "Abrigo para animais abandonados"', 
-      points: 10, 
-      date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() // 1 dia atrás
-    },
-    { 
-      id: 4, 
-      type: 'donation', 
-      description: 'Você doou R$75 para "Ajude o Hospital São Lucas"', 
-      points: 15, 
-      date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() // 2 dias atrás
-    },
-    { 
-      id: 5, 
-      type: 'login', 
-      description: 'Bônus de login por 7 dias consecutivos', 
-      points: 25, 
-      date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() // 3 dias atrás
+  // Busca dados do usuário do banco de dados
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    async function fetchUserData() {
+      setIsLoading(true);
+      try {
+        // 1. Buscar nível do usuário
+        const { data: levelData, error: levelError } = await supabase
+          .from('user_levels')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (levelError && levelError.code !== 'PGRST116') {
+          console.error('Erro ao buscar nível do usuário:', levelError);
+          toast({
+            title: "Erro ao carregar dados",
+            description: "Não foi possível carregar o nível do usuário",
+            variant: "destructive"
+          });
+        }
+        
+        // Se o usuário não tem nível registrado, cria um nível inicial
+        if (!levelData) {
+          // Calcular pontos com base nas doações e inserir nível inicial
+          const { data: donationsData } = await supabase
+            .from('donations')
+            .select('amount')
+            .eq('user_id', user.id);
+            
+          const { data: receivedDonations } = await supabase
+            .from('donations')
+            .select('id')
+            .in('campaign_id', 
+              // Subconsulta para obter IDs de campanhas do usuário
+              supabase
+                .from('campaigns')
+                .select('id')
+                .eq('creator_id', user.id)
+            );
+            
+          // Calcular pontos totais: 50 por doação feita + 20 por doação recebida
+          const donationsMade = donationsData?.length || 0;
+          const donationsReceived = receivedDonations?.length || 0;
+          const calculatedPoints = (donationsMade * 50) + (donationsReceived * 20);
+          
+          // Inserir registro de nível
+          const { data: newLevel, error: insertError } = await supabase
+            .from('user_levels')
+            .insert({
+              user_id: user.id,
+              total_points: calculatedPoints,
+              level: calculateLevel(calculatedPoints),
+              progress: calculateProgress(calculatedPoints)
+            })
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error('Erro ao criar nível do usuário:', insertError);
+          } else if (newLevel) {
+            setUserLevel(newLevel);
+            setUserPoints(newLevel.total_points);
+          }
+        } else {
+          // Usar dados existentes
+          setUserLevel(levelData);
+          setUserPoints(levelData.total_points);
+        }
+        
+        // 2. Buscar total de doações feitas pelo usuário
+        const { data: userDonations, error: donationsError } = await supabase
+          .from('donations')
+          .select('amount')
+          .eq('user_id', user.id);
+          
+        if (donationsError) {
+          console.error('Erro ao buscar doações do usuário:', donationsError);
+        } else if (userDonations) {
+          setDonationCount(userDonations.length);
+          // Somar os valores das doações
+          const total = userDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0);
+          setTotalDonated(total);
+        }
+        
+        // 3. Buscar conquistas do usuário
+        const { data: achievements, error: achievementsError } = await supabase
+          .from('user_achievements')
+          .select('*')
+          .eq('user_id', user.id);
+          
+        if (achievementsError) {
+          console.error('Erro ao buscar conquistas do usuário:', achievementsError);
+        } else if (achievements) {
+          setUserAchievements(achievements);
+        }
+        
+        // 4. Buscar histórico de pontos/atividades
+        const { data: history, error: historyError } = await supabase
+          .from('points_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+          
+        if (historyError) {
+          console.error('Erro ao buscar histórico de atividades:', historyError);
+        } else if (history) {
+          // Mapear histórico para o formato esperado pelo componente
+          const formattedHistory = history.map(item => ({
+            id: item.id,
+            type: item.category,
+            description: item.description,
+            points: item.points,
+            date: item.created_at
+          }));
+          setActivityHistory(formattedHistory);
+        }
+        
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Ocorreu um erro ao buscar seus dados. Tente novamente mais tarde.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
-  ];
+    
+    fetchUserData();
+  }, [user, toast]);
+  
+  // Função para calcular o nível com base nos pontos
+  function calculateLevel(points: number): number {
+    const levelDefinitions = [
+      { level: 1, pointsRequired: 0 },
+      { level: 2, pointsRequired: 100 },
+      { level: 3, pointsRequired: 250 },
+      { level: 4, pointsRequired: 500 },
+      { level: 5, pointsRequired: 1000 },
+      { level: 6, pointsRequired: 2000 },
+      { level: 7, pointsRequired: 4000 },
+      { level: 8, pointsRequired: 7000 },
+      { level: 9, pointsRequired: 10000 },
+      { level: 10, pointsRequired: 15000 },
+    ];
+    
+    // Encontrar o nível correspondente aos pontos
+    const currentLevel = [...levelDefinitions].reverse().find(
+      level => points >= level.pointsRequired
+    );
+    
+    return currentLevel?.level || 1;
+  }
+  
+  // Função para obter o título do nível
+  function getLevelTitle(level: number): string {
+    const titles = {
+      1: "Iniciante",
+      2: "Apoiador",
+      3: "Colaborador",
+      4: "Benfeitor",
+      5: "Filantropo",
+      6: "Humanitário",
+      7: "Altruísta",
+      8: "Benemérito",
+      9: "Visionário",
+      10: "Lenda"
+    };
+    
+    return titles[level as keyof typeof titles] || "Iniciante";
+  }
+  
+  // Função para calcular o progresso percentual para o próximo nível
+  function calculateProgress(points: number): number {
+    const levelDefinitions = [
+      { level: 1, pointsRequired: 0 },
+      { level: 2, pointsRequired: 100 },
+      { level: 3, pointsRequired: 250 },
+      { level: 4, pointsRequired: 500 },
+      { level: 5, pointsRequired: 1000 },
+      { level: 6, pointsRequired: 2000 },
+      { level: 7, pointsRequired: 4000 },
+      { level: 8, pointsRequired: 7000 },
+      { level: 9, pointsRequired: 10000 },
+      { level: 10, pointsRequired: 15000 },
+    ];
+    
+    // Encontrar nível atual e próximo nível
+    const currentLevelData = [...levelDefinitions].reverse().find(
+      level => points >= level.pointsRequired
+    ) || levelDefinitions[0];
+    
+    const nextLevelIndex = levelDefinitions.findIndex(
+      level => level.level === currentLevelData.level
+    ) + 1;
+    
+    const nextLevelData = nextLevelIndex < levelDefinitions.length 
+      ? levelDefinitions[nextLevelIndex] 
+      : null;
+    
+    // Se já está no nível máximo, retorna 100%
+    if (!nextLevelData) return 100;
+    
+    // Calcular progresso percentual
+    const currentLevelPoints = currentLevelData.pointsRequired;
+    const nextLevelPoints = nextLevelData.pointsRequired;
+    const pointsRange = nextLevelPoints - currentLevelPoints;
+    const userPointsInRange = points - currentLevelPoints;
+    
+    return Math.min(100, Math.round((userPointsInRange / pointsRange) * 100));
+  }
   
   // Mostra o modal de conquista desbloqueada após 1 segundo - apenas para demonstração
   useEffect(() => {
@@ -143,13 +317,13 @@ export default function UserProfile() {
                   
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                      <Trophy size={12} className="mr-1" /> Nível 4: Benfeitor
+                      <Trophy size={12} className="mr-1" /> Nível {userLevel.level}: {getLevelTitle(userLevel.level)}
                     </Badge>
                     <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">
-                      <Heart size={12} className="mr-1" /> {mockDonationCount} Doações
+                      <Heart size={12} className="mr-1" /> {donationCount} Doações
                     </Badge>
                     <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
-                      <Gift size={12} className="mr-1" /> {mockUserAchievements.length} Conquistas
+                      <Gift size={12} className="mr-1" /> {userAchievements.length} Conquistas
                     </Badge>
                   </div>
                 </div>
@@ -158,17 +332,17 @@ export default function UserProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Total de Pontos</h3>
-                    <p className="text-xl font-bold text-white">{mockUserPoints}</p>
+                    <p className="text-xl font-bold text-white">{userPoints}</p>
                   </div>
                   
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Campanhas Apoiadas</h3>
-                    <p className="text-xl font-bold text-white">{mockDonationCount}</p>
+                    <p className="text-xl font-bold text-white">{donationCount}</p>
                   </div>
                   
                   <div className="glass-card p-4 rounded-lg border border-white/5">
                     <h3 className="text-gray-400 text-sm mb-1">Total Doado</h3>
-                    <p className="text-xl font-bold text-white">R$ {mockTotalDonated.toFixed(2)}</p>
+                    <p className="text-xl font-bold text-white">R$ {totalDonated.toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -194,7 +368,7 @@ export default function UserProfile() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-8"
           >
-            <UserLevel totalPoints={mockUserPoints} />
+            <UserLevel totalPoints={userPoints} />
           </motion.div>
           
           {/* Conteúdo em abas */}
@@ -222,7 +396,7 @@ export default function UserProfile() {
               >
                 <AchievementGrid 
                   achievements={predefinedAchievements}
-                  userAchievements={mockUserAchievements}
+                  userAchievements={userAchievements}
                   showLockedAchievements={true}
                   showSecretAchievements={false}
                 />
@@ -238,7 +412,7 @@ export default function UserProfile() {
               >
                 <h2 className="text-xl font-bold text-white mb-4">Histórico de Atividades</h2>
                 
-                {mockActivityHistory.map((activity) => (
+                {activityHistory.map((activity) => (
                   <div 
                     key={activity.id}
                     className="glass-card p-4 rounded-lg border border-white/5 flex items-center gap-4"

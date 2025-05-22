@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Stripe from "stripe";
+import { createClient } from '@supabase/supabase-js';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -9,6 +10,140 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-04-30.basil",
 });
+
+// Inicializar cliente Supabase para interagir com o banco de dados
+if (!process.env.DATABASE_URL) {
+  throw new Error('Missing required database URL: DATABASE_URL');
+}
+
+// Criar cliente Supabase com a URL de conexão
+const supabaseUrl = 'https://api.supabase.com';
+const supabaseKey = process.env.DATABASE_URL;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Funções auxiliares para gerenciar pontos e níveis
+async function updateUserPoints(userId: string, pointsToAdd: number, category: string, description: string) {
+  try {
+    if (!userId) return;
+    
+    // 1. Buscar nível atual do usuário
+    const { data: levelData } = await supabase
+      .from('user_levels')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    // 2. Calcular novos pontos totais
+    const currentPoints = levelData?.total_points || 0;
+    const newTotalPoints = currentPoints + pointsToAdd;
+    
+    // 3. Calcular novo nível e progresso
+    const newLevel = calculateUserLevel(newTotalPoints);
+    const newProgress = calculateLevelProgress(newTotalPoints);
+    
+    // 4. Registrar histórico de pontos
+    await supabase
+      .from('points_history')
+      .insert({
+        user_id: userId,
+        category,
+        points: pointsToAdd,
+        description,
+        created_at: new Date().toISOString()
+      });
+    
+    // 5. Atualizar ou criar registro de nível do usuário
+    if (levelData) {
+      await supabase
+        .from('user_levels')
+        .update({
+          level: newLevel,
+          total_points: newTotalPoints,
+          progress: newProgress,
+          last_updated: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+    } else {
+      await supabase
+        .from('user_levels')
+        .insert({
+          user_id: userId,
+          level: newLevel,
+          total_points: newTotalPoints,
+          progress: newProgress,
+          last_updated: new Date().toISOString()
+        });
+    }
+    
+    return { level: newLevel, totalPoints: newTotalPoints, progress: newProgress };
+  } catch (error) {
+    console.error('Erro ao atualizar pontos do usuário:', error);
+    return null;
+  }
+}
+
+// Calcular nível do usuário com base nos pontos
+function calculateUserLevel(points: number): number {
+  const levelDefinitions = [
+    { level: 1, pointsRequired: 0 },
+    { level: 2, pointsRequired: 100 },
+    { level: 3, pointsRequired: 250 },
+    { level: 4, pointsRequired: 500 },
+    { level: 5, pointsRequired: 1000 },
+    { level: 6, pointsRequired: 2000 },
+    { level: 7, pointsRequired: 4000 },
+    { level: 8, pointsRequired: 7000 },
+    { level: 9, pointsRequired: 10000 },
+    { level: 10, pointsRequired: 15000 },
+  ];
+  
+  // Encontrar o nível correspondente aos pontos
+  const currentLevel = [...levelDefinitions].reverse().find(
+    level => points >= level.pointsRequired
+  );
+  
+  return currentLevel?.level || 1;
+}
+
+// Calcular progresso percentual para o próximo nível
+function calculateLevelProgress(points: number): number {
+  const levelDefinitions = [
+    { level: 1, pointsRequired: 0 },
+    { level: 2, pointsRequired: 100 },
+    { level: 3, pointsRequired: 250 },
+    { level: 4, pointsRequired: 500 },
+    { level: 5, pointsRequired: 1000 },
+    { level: 6, pointsRequired: 2000 },
+    { level: 7, pointsRequired: 4000 },
+    { level: 8, pointsRequired: 7000 },
+    { level: 9, pointsRequired: 10000 },
+    { level: 10, pointsRequired: 15000 },
+  ];
+  
+  // Encontrar nível atual e próximo nível
+  const currentLevelData = [...levelDefinitions].reverse().find(
+    level => points >= level.pointsRequired
+  ) || levelDefinitions[0];
+  
+  const nextLevelIndex = levelDefinitions.findIndex(
+    level => level.level === currentLevelData.level
+  ) + 1;
+  
+  const nextLevelData = nextLevelIndex < levelDefinitions.length 
+    ? levelDefinitions[nextLevelIndex] 
+    : null;
+  
+  // Se já está no nível máximo, retorna 100%
+  if (!nextLevelData) return 100;
+  
+  // Calcular progresso percentual
+  const currentLevelPoints = currentLevelData.pointsRequired;
+  const nextLevelPoints = nextLevelData.pointsRequired;
+  const pointsRange = nextLevelPoints - currentLevelPoints;
+  const userPointsInRange = points - currentLevelPoints;
+  
+  return Math.min(100, Math.round((userPointsInRange / pointsRange) * 100));
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para processar pagamentos de doação
