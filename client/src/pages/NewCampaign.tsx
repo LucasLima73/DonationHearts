@@ -76,7 +76,7 @@ export default function NewCampaign() {
     }
   });
   
-  // Upload de imagens para o servidor e obtenção da URL
+  // Upload de imagens para o Supabase Storage
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -91,16 +91,66 @@ export default function NewCampaign() {
       return;
     }
     
-    // Preview local
+    // Preview local (imediato)
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result as string);
     };
     reader.readAsDataURL(file);
     
-    // Simulação de upload - em uma implementação real, faríamos o upload para o Supabase Storage
-    // por enquanto, apenas atualizamos o campo com a URL do preview
-    form.setValue('image_url', 'https://source.unsplash.com/random/300x200?sig=1');
+    try {
+      // Mostrar que estamos fazendo o upload
+      toast({
+        title: "Fazendo upload da imagem",
+        description: "Por favor, aguarde...",
+      });
+      
+      // Gerar nome único para o arquivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      const filePath = `campaign_images/${fileName}`;
+      
+      // Fazer upload para o Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('campaign_images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      // Obter a URL pública da imagem
+      const { data: urlData } = supabase.storage
+        .from('campaign_images')
+        .getPublicUrl(filePath);
+      
+      if (urlData) {
+        form.setValue('image_url', urlData.publicUrl);
+        toast({
+          title: "Upload concluído",
+          description: "Imagem carregada com sucesso!",
+        });
+      }
+    } catch (error) {
+      console.error('Erro no upload da imagem:', error);
+      toast({
+        title: "Falha no upload",
+        description: "Não foi possível fazer o upload da imagem. Usando imagem temporária.",
+        variant: "destructive",
+      });
+      
+      // Usar o preview como fallback (base64)
+      const previewImage = imagePreview;
+      if (previewImage) {
+        form.setValue('image_url', previewImage);
+      } else {
+        // Usar URL aleatória como último recurso
+        form.setValue('image_url', `https://source.unsplash.com/random/300x200?sig=${Math.floor(Math.random() * 100)}`);
+      }
+    }
   };
   
   // Envio do formulário
