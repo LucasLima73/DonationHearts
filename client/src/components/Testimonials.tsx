@@ -12,7 +12,7 @@ const testimonials = [
     name: "Camila Torres",
     role: "Influenciadora",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Quando compartilhei meu sonho de ir ao festival de moda em Milão, não esperava que tantas pessoas se conectariam com minha história. O DoeAqui mudou minha carreira!",
+    quote: "Quando compartilhei meu sonho de ir ao festival de moda em Milão, não esperava que tantas pessoas se conectariam com minha história. O MIMO mudou minha carreira!",
     stars: 5
   },
   {
@@ -20,7 +20,7 @@ const testimonials = [
     name: "Mariana Duarte",
     role: "Estudante de Cinema",
     image: "https://images.unsplash.com/photo-1619855544858-e05e1e2e9da5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Graças aos apoiadores do DoeAqui, consegui comprar minha primeira câmera profissional. A comunidade não só doou, mas me incentivou a seguir meu sonho!",
+    quote: "Graças aos apoiadores do MIMO, consegui comprar minha primeira câmera profissional. A comunidade não só doou, mas me incentivou a seguir meu sonho!",
     stars: 5
   },
   {
@@ -28,7 +28,7 @@ const testimonials = [
     name: "Sofia Lima",
     role: "Designer Gráfica",
     image: "https://images.unsplash.com/photo-1598550880863-4e8aa3d0edb4?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Abrir meu estúdio parecia impossível, mas a comunidade do DoeAqui tornou isso realidade. Agora tenho meu próprio espaço e estou realizando projetos incríveis!",
+    quote: "Abrir meu estúdio parecia impossível, mas a comunidade do MIMO tornou isso realidade. Agora tenho meu próprio espaço e estou realizando projetos incríveis!",
     stars: 5
   },
   {
@@ -36,7 +36,7 @@ const testimonials = [
     name: "Larissa Mendonça",
     role: "Empreendedora",
     image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Com o DoeAqui, consegui lançar minha linha de produtos naturais. A transparência da plataforma fez toda diferença para criar confiança com os apoiadores.",
+    quote: "Com o MIMO, consegui lançar minha linha de produtos naturais. A transparência da plataforma fez toda diferença para criar confiança com os apoiadores.",
     stars: 5
   }
 ];
@@ -106,7 +106,7 @@ export default function Testimonials() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Veja como o DoeAqui está transformando sonhos em realidade e inspirando pessoas a seguirem seus caminhos.
+            Veja como o MIMO está transformando sonhos em realidade e inspirando pessoas a seguirem seus caminhos.
           </motion.p>
         </div>
 

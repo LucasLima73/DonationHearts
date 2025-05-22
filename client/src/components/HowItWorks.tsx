@@ -48,7 +48,7 @@ export default function HowItWorks() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Três passos simples para transformar seus sonhos em realidade com o DoeAqui
+            Três passos simples para transformar seus sonhos em realidade com o MIMO
           </motion.p>
         </div>
 

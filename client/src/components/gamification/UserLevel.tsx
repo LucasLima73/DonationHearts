@@ -151,7 +151,7 @@ export function UserLevel({ totalPoints, className, showDetails = true }: UserLe
                 <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs text-primary">✓</span>
                 </div>
-                <span>Reconhecimento especial na comunidade DoeAqui</span>
+                <span>Reconhecimento especial na comunidade MIMO</span>
               </li>
             )}
             {currentLevelData.level >= 10 && (
