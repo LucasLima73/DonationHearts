@@ -29,7 +29,7 @@ export function StripeCheckout({ amount, campaignId, onSuccess, onCancel }: Stri
     setMessage(null);
 
     try {
-      const { error } = await stripe.confirmPayment({
+      const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: window.location.href, // URL para redirecionamento após pagamento
@@ -49,13 +49,21 @@ export function StripeCheckout({ amount, campaignId, onSuccess, onCancel }: Stri
           description: error.message || 'Ocorreu um erro ao processar o pagamento.',
           variant: 'destructive',
         });
-      } else {
-        // O pagamento foi bem-sucedido
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // O pagamento foi bem-sucedido, registramos a doação no banco de dados
         toast({
           title: 'Pagamento realizado',
           description: 'Sua doação foi processada com sucesso. Obrigado!',
         });
+        
+        // Chamar o callback de sucesso com o ID do PaymentIntent
         onSuccess();
+      } else {
+        // Pagamento está em processamento ou precisa de mais ações
+        toast({
+          title: 'Pagamento em processamento',
+          description: 'Seu pagamento está sendo processado. Você receberá uma confirmação em breve.',
+        });
       }
     } catch (err: any) {
       console.error('Erro no processamento do pagamento:', err);

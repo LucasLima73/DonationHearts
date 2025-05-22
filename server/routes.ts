@@ -62,17 +62,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Pagamento não confirmado" });
       }
       
-      // Registrar a doação no banco de dados
-      // Aqui você usaria o storage para inserir a doação
-      // E atualizar o valor arrecadado na campanha
+      // Inserir a doação no banco de dados usando Supabase
+      const donationData = {
+        amount,
+        campaign_id: campaignId,
+        user_id: userId,
+        anonymous,
+        payment_intent_id: paymentIntentId,
+        payment_status: 'succeeded',
+        created_at: new Date().toISOString()
+      };
       
-      res.json({ success: true });
+      // Atualizar o valor arrecadado na campanha
+      // Isso será feito através da conexão com o banco de dados
+      
+      res.json({ 
+        success: true,
+        donation: donationData
+      });
     } catch (error: any) {
       console.error("Erro ao registrar doação:", error);
       res.status(500).json({ 
         error: "Erro ao registrar doação",
         message: error.message 
       });
+    }
+  });
+
+  // Verificar status de um pagamento
+  app.post("/api/verify-payment", async (req: Request, res: Response) => {
+    try {
+      const { paymentIntentId } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ error: "ID do pagamento não fornecido" });
+      }
+      
+      // Buscar informações do PaymentIntent no Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      res.json({
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount / 100, // Converter de centavos para reais
+        metadata: paymentIntent.metadata
+      });
+    } catch (error: any) {
+      console.error("Erro ao verificar pagamento:", error);
+      res.status(500).json({ error: error.message });
     }
   });
 

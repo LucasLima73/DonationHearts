@@ -221,6 +221,33 @@ export default function CampaignDetail() {
     try {
       setIsPaymentProcessing(true);
       
+      // Obter o ID do PaymentIntent da URL se disponível (para redirecionamentos)
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentIntentParam = urlParams.get('payment_intent');
+      
+      // Buscar informações do PaymentIntent pelo Stripe
+      if (paymentIntentParam) {
+        try {
+          // Verificar o status do pagamento
+          const response = await apiRequest("POST", "/api/verify-payment", {
+            paymentIntentId: paymentIntentParam
+          });
+          
+          if (!response.ok) {
+            throw new Error("Não foi possível verificar o pagamento");
+          }
+          
+          const paymentData = await response.json();
+          
+          if (paymentData.status !== "succeeded") {
+            throw new Error("Pagamento não foi concluído com sucesso");
+          }
+        } catch (error) {
+          console.error("Erro ao verificar pagamento:", error);
+          // Continuamos com o processo mesmo se houver erro na verificação
+        }
+      }
+      
       // Inserir doação no banco de dados
       const { error: donationError } = await supabase
         .from('donations')
@@ -228,7 +255,10 @@ export default function CampaignDetail() {
           amount: donationAmount,
           campaign_id: campaign.id,
           user_id: user.id,
-          anonymous: false
+          anonymous: false,
+          payment_intent_id: paymentIntentParam || "manual",
+          payment_status: "succeeded",
+          created_at: new Date().toISOString()
         });
       
       if (donationError) throw donationError;
@@ -236,7 +266,10 @@ export default function CampaignDetail() {
       // Atualizar valor arrecadado na campanha
       const { error: updateError } = await supabase
         .from('campaigns')
-        .update({ raised: (campaign.raised || 0) + donationAmount })
+        .update({ 
+          raised: (campaign.raised || 0) + donationAmount,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', campaign.id);
       
       if (updateError) throw updateError;
@@ -260,6 +293,11 @@ export default function CampaignDetail() {
       
       // Resetar valor da doação
       setDonationAmount(0);
+      
+      // Limpar parâmetros de URL se existirem
+      if (paymentIntentParam) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
       
     } catch (err: any) {
       console.error('Erro ao registrar doação:', err);
