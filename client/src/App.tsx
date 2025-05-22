@@ -9,7 +9,7 @@ import DetailPage from "@/pages/DetailPage";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import UserProfile from "@/pages/UserProfile";
-import Dashboard from "@/pages/Dashboard";
+import Dashboard from "@/pages/DashboardNew";
 import NewCampaign from "@/pages/NewCampaign";
 import CampaignDetail from "@/pages/CampaignDetail";
 import MyCampaigns from "@/pages/MyCampaigns";

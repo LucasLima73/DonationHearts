@@ -19,7 +19,8 @@ import {
   ChevronRight,
   PlusCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Share
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
@@ -27,7 +28,6 @@ import { predefinedAchievements } from '@shared/achievements';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { OnboardingController } from '@/components/onboarding/OnboardingController';
-import { DashboardStats } from '@/components/dashboard/DashboardStats';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -38,6 +38,14 @@ export default function Dashboard() {
   const [hideCampaignValues, setHideCampaignValues] = useState(false);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  
+  // Estados para armazenar os dados reais
+  const [userPoints, setUserPoints] = useState(0);
+  const [donationCount, setDonationCount] = useState(0);
+  const [totalDonated, setTotalDonated] = useState(0);
+  const [totalReceived, setTotalReceived] = useState(0);
+  const [receivedDonationCount, setReceivedDonationCount] = useState(0);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   
   // Para demonstração do tour de onboarding
   const resetOnboarding = () => {
@@ -56,7 +64,7 @@ export default function Dashboard() {
     setHideCampaignValues(!hideCampaignValues);
   };
   
-  // Carregar os dados de doações e estatísticas do usuário
+  // Verificar se é a primeira vez do usuário e mostrar mensagem de boas-vindas
   useEffect(() => {
     if (!isLoading && user) {
       // Verificar se é a primeira visita do usuário
@@ -70,9 +78,13 @@ export default function Dashboard() {
         // Marcar que o usuário já recebeu as boas-vindas
         localStorage.setItem(`doeaqui-user-welcomed-${user.id}`, 'true');
       }
-      
-      // Buscar estatísticas reais de doações
-      const fetchUserStats = async () => {
+    }
+  }, [user, isLoading]);
+  
+  // Carregar dados reais de doações
+  useEffect(() => {
+    if (!isLoading && user) {
+      const fetchDonationStats = async () => {
         setIsLoadingStats(true);
         try {
           // 1. Buscar total doado pelo usuário
@@ -84,9 +96,12 @@ export default function Dashboard() {
           if (donationsError) throw donationsError;
           
           // Calcular total doado e contagem de doações
-          const totalAmount = userDonations.reduce((sum, donation) => sum + donation.amount, 0);
+          let totalAmount = 0;
+          if (userDonations && userDonations.length > 0) {
+            totalAmount = userDonations.reduce((sum: number, donation: any) => sum + donation.amount, 0);
+          }
           setTotalDonated(totalAmount);
-          setDonationCount(userDonations.length);
+          setDonationCount(userDonations ? userDonations.length : 0);
           
           // 2. Buscar campanhas do usuário
           const { data: userCampaigns, error: campaignsError } = await supabase
@@ -102,25 +117,28 @@ export default function Dashboard() {
           
           if (userCampaigns && userCampaigns.length > 0) {
             // Somar os valores arrecadados de todas as campanhas do usuário
-            totalRaised = userCampaigns.reduce((sum, campaign) => sum + (campaign.raised || 0), 0);
+            totalRaised = userCampaigns.reduce((sum: number, campaign: any) => sum + (campaign.raised || 0), 0);
             
             // Contar o número total de doações recebidas
-            const campaignIds = userCampaigns.map(campaign => campaign.id);
-            const { data: receivedDonations, error: receivedError } = await supabase
-              .from('donations')
-              .select('id')
-              .in('campaign_id', campaignIds);
-            
-            if (!receivedError && receivedDonations) {
-              totalDonationsReceived = receivedDonations.length;
+            const campaignIds = userCampaigns.map((campaign: any) => campaign.id);
+            if (campaignIds.length > 0) {
+              const { data: receivedDonations, error: receivedError } = await supabase
+                .from('donations')
+                .select('id')
+                .in('campaign_id', campaignIds);
+              
+              if (!receivedError && receivedDonations) {
+                totalDonationsReceived = receivedDonations.length;
+              }
             }
           }
           
           setTotalReceived(totalRaised);
           setReceivedDonationCount(totalDonationsReceived);
           
-          // 4. Definir pontos do usuário (podemos calcular baseado em atividades ou usar um valor fixo temporariamente)
-          setUserPoints(totalDonationsReceived * 20 + userDonations.length * 50);
+          // 4. Definir pontos do usuário (podemos calcular baseado em atividades)
+          const userPointsValue = totalDonationsReceived * 20 + (userDonations ? userDonations.length : 0) * 50;
+          setUserPoints(userPointsValue);
           
         } catch (err) {
           console.error('Erro ao carregar estatísticas:', err);
@@ -129,7 +147,7 @@ export default function Dashboard() {
         }
       };
       
-      fetchUserStats();
+      fetchDonationStats();
     }
   }, [user, isLoading]);
   
@@ -139,14 +157,6 @@ export default function Dashboard() {
       setLocation('/login');
     }
   }, [user, isLoading, setLocation]);
-  
-  // Estados para armazenar os dados reais
-  const [userPoints, setUserPoints] = useState(0);
-  const [donationCount, setDonationCount] = useState(0);
-  const [totalDonated, setTotalDonated] = useState(0);
-  const [totalReceived, setTotalReceived] = useState(0);
-  const [receivedDonationCount, setReceivedDonationCount] = useState(0);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
   
   // Campanhas recentes de exemplo
   const recentCampaigns = [
@@ -364,7 +374,9 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-gray-400 text-sm">Total de Pontos</p>
-                      <h3 className="text-2xl font-bold text-white">{userPoints}</h3>
+                      <h3 className="text-2xl font-bold text-white">
+                        {isLoadingStats ? "-" : userPoints}
+                      </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                       <Award className="h-6 w-6 text-primary" />
@@ -387,7 +399,9 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-gray-400 text-sm">Doações Realizadas</p>
-                      <h3 className="text-2xl font-bold text-white">{mockDonationCount}</h3>
+                      <h3 className="text-2xl font-bold text-white">
+                        {isLoadingStats ? "-" : donationCount}
+                      </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-secondary/10 flex items-center justify-center">
                       <HeartIcon className="h-6 w-6 text-secondary" />
@@ -410,10 +424,11 @@ export default function Dashboard() {
                     <div>
                       <p className="text-gray-400 text-sm">Total Doado</p>
                       <h3 className="text-2xl font-bold text-white">
-                        {hideDonationValues ? 
+                        {isLoadingStats ? "-" : (
+                          hideDonationValues ? 
                           "R$ ••••••" : 
-                          `R$ ${mockTotalDonated.toFixed(2)}`
-                        }
+                          `R$ ${totalDonated.toFixed(2)}`
+                        )}
                       </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -449,44 +464,31 @@ export default function Dashboard() {
                     }
                   </Button>
                 </div>
+                <Button 
+                  onClick={() => setLocation('/campanhas/nova')}
+                  className="bg-gradient-to-r from-primary to-secondary hover:brightness-110"
+                >
+                  <PlusCircle className="w-4 h-4 mr-2" />
+                  Nova Campanha
+                </Button>
               </div>
               
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10"
+                className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8"
               >
                 <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <p className="text-gray-400 text-sm">Campanhas Criadas</p>
-                      <h3 className="text-2xl font-bold text-white">3</h3>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <Calendar className="h-6 w-6 text-green-500" />
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs border-green-500/20 text-green-500 hover:bg-green-500/10"
-                    >
-                      Gerenciar campanhas
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="glass-card p-5 rounded-xl border border-white/5 relative overflow-hidden neon-border-subtle">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
                       <p className="text-gray-400 text-sm">Doações Recebidas</p>
-                      <h3 className="text-2xl font-bold text-white">{mockReceivedDonationCount}</h3>
+                      <h3 className="text-2xl font-bold text-white">
+                        {isLoadingStats ? "-" : receivedDonationCount}
+                      </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                      <User className="h-6 w-6 text-purple-500" />
+                      <HeartIcon className="h-6 w-6 text-purple-500" />
                     </div>
                   </div>
                   <div className="mt-4">
@@ -506,10 +508,11 @@ export default function Dashboard() {
                     <div>
                       <p className="text-gray-400 text-sm">Total Recebido</p>
                       <h3 className="text-2xl font-bold text-white">
-                        {hideCampaignValues ? 
+                        {isLoadingStats ? "-" : (
+                          hideCampaignValues ? 
                           "R$ ••••••" : 
-                          `R$ ${mockTotalReceived.toFixed(2)}`
-                        }
+                          `R$ ${totalReceived.toFixed(2)}`
+                        )}
                       </h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -530,233 +533,255 @@ export default function Dashboard() {
               </motion.div>
             </div>
             
-            {/* Progresso de nível */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-10"
-              id="achievements-section"
-            >
-              <UserLevel totalPoints={mockUserPoints} />
-            </motion.div>
-            
-            {/* Botão de criar campanha */}
-            <div className="mb-6 flex justify-end">
-              <Button 
-                id="create-campaign-button"
-                variant="default" 
-                size="default"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => setLocation('/nova-campanha')}
-              >
-                <PlusCircle className="w-4 h-4 mr-2" />
-                Nova Campanha
-              </Button>
-            </div>
+            {/* Tabs de Campanhas e Atividades */}
+            <Tabs defaultValue="campaigns" className="w-full">
+              <TabsList className="mb-4 grid grid-cols-3 max-w-md glass-card rounded-lg border border-white/5">
+                <TabsTrigger value="campaigns">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Campanhas
+                </TabsTrigger>
+                <TabsTrigger value="history">
+                  <History className="w-4 h-4 mr-2" />
+                  Atividades
+                </TabsTrigger>
+                <TabsTrigger value="search">
+                  <Search className="w-4 h-4 mr-2" />
+                  Descobrir
+                </TabsTrigger>
+              </TabsList>
               
-            {/* Abas de conteúdo */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Tabs defaultValue="campaigns" className="w-full">
-                <TabsList className="mb-6 grid w-full max-w-md mx-auto grid-cols-3 bg-transparent">
-                  <TabsTrigger 
-                    value="campaigns" 
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md data-[state=active]:shadow-none"
+              <TabsContent value="campaigns" className="space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-white">Campanhas Recentes</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-white/10 hover:bg-white/5"
                   >
-                    <Calendar size={16} className="mr-2" />
-                    Campanhas
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="activity" 
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md data-[state=active]:shadow-none"
-                  >
-                    <History size={16} className="mr-2" />
-                    Atividades
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="explore" 
-                    className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md data-[state=active]:shadow-none"
-                  >
-                    <Search size={16} className="mr-2" />
-                    Explorar
-                  </TabsTrigger>
-                </TabsList>
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filtrar
+                  </Button>
+                </div>
                 
-                <TabsContent value="campaigns" className="mt-0">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-white">Campanhas em Andamento</h2>
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <Filter size={14} />
-                      Filtrar
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recentCampaigns.map((campaign) => (
-                      <div key={campaign.id} className="glass-card rounded-xl overflow-hidden border border-white/5 hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group">
-                        <div className="relative h-48">
-                          <img 
-                            src={campaign.imageUrl} 
-                            alt={campaign.title} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
-                            {campaign.category}
-                          </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {recentCampaigns.map((campaign) => (
+                    <motion.div 
+                      key={campaign.id}
+                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                      className="glass-card rounded-xl border border-white/5 overflow-hidden"
+                    >
+                      <div className="h-40 overflow-hidden">
+                        <img 
+                          src={campaign.imageUrl} 
+                          alt={campaign.title} 
+                          className="w-full h-full object-cover hover:scale-105 transition-all duration-300"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="inline-block px-2 py-1 bg-white/10 rounded-md text-xs text-gray-300 mb-2">
+                          {campaign.category}
                         </div>
-                        
-                        <div className="p-5">
-                          <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
-                            {campaign.title}
-                          </h3>
-                          
-                          <div className="mt-3 mb-4">
-                            <div className="flex justify-between text-sm mb-1">
-                              <span className="text-gray-300">Progresso</span>
-                              <span className="text-primary font-medium">{campaign.progress}%</span>
-                            </div>
-                            <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-primary to-secondary"
-                                style={{ width: `${campaign.progress}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between mt-2 text-sm">
-                              <span className="text-gray-400">
-                                {hideCampaignValues 
-                                  ? "R$ •••••" 
-                                  : `R$ ${campaign.raised.toLocaleString('pt-BR')}`
-                                }
-                              </span>
-                              <span className="text-gray-400">
-                                {hideCampaignValues 
-                                  ? "R$ •••••" 
-                                  : `R$ ${campaign.goal.toLocaleString('pt-BR')}`
-                                }
-                              </span>
-                            </div>
+                        <h4 className="font-bold text-white mb-1 line-clamp-2">
+                          {campaign.title}
+                        </h4>
+                        <div className="flex justify-between text-xs text-gray-400 mb-2">
+                          <span>{campaign.daysLeft} dias restantes</span>
+                          <span>{campaign.progress}% concluído</span>
+                        </div>
+                        <div className="h-1.5 bg-white/10 rounded-full mb-3">
+                          <div 
+                            className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
+                            style={{ width: `${campaign.progress}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm text-gray-300">
+                            <span className="font-medium text-white">
+                              {hideCampaignValues ? "R$ •••••" : `R$ ${campaign.raised}`}
+                            </span> / {hideCampaignValues ? "R$ •••••" : `R$ ${campaign.goal}`}
                           </div>
-                          
-                          <div className="flex justify-between items-center mt-4">
-                            <div className="text-xs text-gray-400">
-                              {campaign.daysLeft} dias restantes
-                            </div>
-                            <Button 
-                              asChild 
-                              size="sm" 
-                              className="bg-primary hover:bg-primary/90 font-medium"
-                            >
-                              <Link href={`/detalhes/${campaign.id}`}>
-                                <div>Ajudar</div>
-                              </Link>
-                            </Button>
-                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs hover:bg-white/5"
+                            onClick={() => setLocation(`/campanhas/${campaign.id}`)}
+                          >
+                            Visualizar
+                            <ChevronRight className="w-3 h-3 ml-1" />
+                          </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 text-center">
-                    <Button 
-                      variant="outline" 
-                      className="border-white/10 hover:bg-white/5"
-                    >
-                      Ver todas as campanhas
-                    </Button>
-                  </div>
-                </TabsContent>
+                    </motion.div>
+                  ))}
+                </div>
                 
-                <TabsContent value="activity" className="mt-0">
-                  <h2 className="text-xl font-bold text-white mb-4">Histórico de Atividades</h2>
-                  
-                  <div className="space-y-4">
-                    {activityHistory.map((activity) => (
-                      <div 
-                        key={activity.id}
-                        className="glass-card p-4 rounded-xl border border-white/5 flex items-center gap-4"
-                      >
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          activity.type === 'donation' ? 'bg-primary/20 text-primary' :
-                          activity.type === 'achievement' ? 'bg-secondary/20 text-secondary' :
-                          'bg-accent/20 text-accent'
-                        }`}>
-                          {activity.type === 'donation' ? <HeartIcon size={18} /> :
-                           activity.type === 'achievement' ? <Award size={18} /> :
-                           <User size={18} />}
-                        </div>
-                        
-                        <div className="flex-1">
-                          <p className="text-white">{activity.description}</p>
-                          <p className="text-xs text-gray-400">
-                            {new Date(activity.date).toLocaleString('pt-BR', { 
+                <div className="flex justify-center mt-6">
+                  <Button
+                    onClick={() => setLocation('/minhas-campanhas')}
+                    variant="outline"
+                    className="border-white/10 hover:bg-white/5"
+                  >
+                    Ver todas minhas campanhas
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="history" className="space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-white">Histórico de Atividades</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-white/10 hover:bg-white/5"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Filtrar
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {activityHistory.map((activity) => (
+                    <div 
+                      key={activity.id}
+                      className="glass-card p-4 rounded-xl border border-white/5 flex items-start gap-3"
+                    >
+                      <div className={`
+                        w-10 h-10 rounded-full flex items-center justify-center shrink-0
+                        ${activity.type === 'donation' ? 'bg-secondary/20' : ''}
+                        ${activity.type === 'achievement' ? 'bg-primary/20' : ''}
+                        ${activity.type === 'sharing' ? 'bg-blue-500/20' : ''}
+                      `}>
+                        {activity.type === 'donation' && <HeartIcon className="w-5 h-5 text-secondary" />}
+                        {activity.type === 'achievement' && <Award className="w-5 h-5 text-primary" />}
+                        {activity.type === 'sharing' && <Share className="w-5 h-5 text-blue-500" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-300 mb-1">{activity.description}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">
+                            {new Date(activity.date).toLocaleDateString('pt-BR', {
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit'
                             })}
-                          </p>
-                        </div>
-                        
-                        <div className="text-right">
-                          <span className="text-primary font-medium">+{activity.points} pts</span>
+                          </span>
+                          <span className="text-xs font-medium text-primary">
+                            +{activity.points} pontos
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 text-center">
-                    <Button 
-                      variant="outline" 
-                      className="border-white/10 hover:bg-white/5"
-                    >
-                      Ver histórico completo
-                    </Button>
-                  </div>
-                </TabsContent>
+                    </div>
+                  ))}
+                </div>
                 
-                <TabsContent value="explore" className="mt-0">
-                  <div className="glass-card p-8 rounded-xl border border-white/5 text-center">
-                    <Search className="w-16 h-16 mx-auto mb-4 text-primary opacity-40" />
-                    <h3 className="text-xl font-bold text-white mb-2">Encontre causas para apoiar</h3>
-                    <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                      Busque campanhas por categoria, localização ou palavras-chave para 
-                      encontrar causas que combinam com seus valores e interesses.
-                    </p>
+                <div className="flex justify-center mt-6">
+                  <Button
+                    variant="outline"
+                    className="border-white/10 hover:bg-white/5"
+                  >
+                    Ver histórico completo
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="search" className="space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-white">Campanhas Recomendadas</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-white/10 hover:bg-white/5"
+                    onClick={() => setLocation('/campanhas')}
+                  >
+                    Ver todas
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+                
+                <div className="glass-card p-6 rounded-xl border border-white/5 text-center">
+                  <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">Descubra causas incríveis</h3>
+                  <p className="text-gray-300 mb-6 max-w-md mx-auto">
+                    Encontre campanhas que se alinham com seus valores e interesses. Faça a diferença apoiando causas que você se importa.
+                  </p>
+                  <Button
+                    onClick={() => setLocation('/campanhas')}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    Explorar campanhas
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+            
+            {/* Níveis e Conquistas */}
+            <div className="mt-12 mb-16">
+              <h2 className="text-xl font-bold text-white mb-6">Seu Progresso</h2>
+              
+              <div className="glass-card p-6 rounded-xl border border-white/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-4">Nível de Impacto</h3>
+                    <UserLevel totalPoints={userPoints} showDetails />
                     
-                    <div className="flex gap-4 flex-wrap justify-center">
-                      <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                        Saúde
-                      </Button>
-                      <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                        Educação
-                      </Button>
-                      <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                        Animais
-                      </Button>
-                      <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                        Meio Ambiente
-                      </Button>
-                      <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                        Pessoas Vulneráveis
-                      </Button>
+                    <div className="mt-6 text-sm text-gray-300 space-y-2">
+                      <p>Ganhe pontos para subir de nível e desbloquear benefícios:</p>
+                      <ul className="space-y-1 pl-5 list-disc">
+                        <li>Fazer doações (+50 pontos)</li>
+                        <li>Receber doações (+20 pontos)</li>
+                        <li>Compartilhar campanhas (+10 pontos)</li>
+                        <li>Completar suas campanhas (+100 pontos)</li>
+                      </ul>
                     </div>
                   </div>
-                </TabsContent>
-              </Tabs>
-            </motion.div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-semibold text-white">Conquistas Recentes</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setLocation('/perfil')}
+                        className="text-xs hover:bg-white/5"
+                      >
+                        Ver todas
+                        <ChevronRight className="w-3 h-3 ml-1" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      {predefinedAchievements.slice(0, 3).map((achievement) => (
+                        <div 
+                          key={achievement.name}
+                          className="glass-card p-4 rounded-lg border border-white/10 text-center hover:border-primary/30 transition-colors duration-200"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-2">
+                            <span className="text-xl">{achievement.icon}</span>
+                          </div>
+                          <h4 className="text-sm font-medium text-white mb-1">{achievement.name}</h4>
+                          <p className="text-xs text-gray-400">{achievement.category}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Modal de conquista desbloqueada - apenas demonstração */}
+      {/* Modal de nova conquista */}
       {showNewAchievement && (
         <AchievementUnlock 
-          achievement={predefinedAchievements[2]} // "Coração Generoso"
+          achievement={predefinedAchievements[0]} 
+          autoClose
           onClose={() => setShowNewAchievement(false)}
         />
       )}
