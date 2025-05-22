@@ -17,7 +17,9 @@ import {
   Pencil,
   Trash,
   Save,
-  X
+  X,
+  CreditCard,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +30,9 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Campaign, updateCampaignSchema, type UpdateCampaign } from '@shared/campaigns';
 import confetti from 'canvas-confetti';
+import { StripeProvider } from '@/components/payment/StripeProvider';
+import { StripeCheckout } from '@/components/payment/StripeCheckout';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -44,6 +49,8 @@ export default function CampaignDetail() {
   const [error, setError] = useState<string | null>(null);
   const [donationAmount, setDonationAmount] = useState(0);
   const [showDonationSuccess, setShowDonationSuccess] = useState(false);
+  const [isStripeOpen, setIsStripeOpen] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   
   // Carregar dados da campanha
   useEffect(() => {
@@ -192,12 +199,29 @@ export default function CampaignDetail() {
     }
   };
   
-  // Fazer uma doação
-  const handleDonate = async () => {
-    if (!campaign || !user || donationAmount <= 0) return;
+  // Iniciar processo de doação
+  const handleDonate = () => {
+    if (!campaign || !user || donationAmount <= 0) {
+      toast({
+        title: 'Valor inválido',
+        description: 'Por favor, informe um valor válido para sua doação.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    // Abrir o diálogo de pagamento com Stripe
+    setIsStripeOpen(true);
+  };
+  
+  // Processar doação após confirmação do pagamento
+  const handlePaymentSuccess = async () => {
+    if (!campaign || !user) return;
     
     try {
-      // Inserir doação
+      setIsPaymentProcessing(true);
+      
+      // Inserir doação no banco de dados
       const { error: donationError } = await supabase
         .from('donations')
         .insert({
@@ -223,8 +247,11 @@ export default function CampaignDetail() {
         raised: (prev.raised || 0) + donationAmount
       } : null);
       
-      // Mostrar mensagem de sucesso e efeitos
+      // Fechar o diálogo de pagamento e mostrar mensagem de sucesso
+      setIsStripeOpen(false);
       setShowDonationSuccess(true);
+      
+      // Efeitos visuais de celebração
       confetti({
         particleCount: 100,
         spread: 70,
@@ -234,17 +261,15 @@ export default function CampaignDetail() {
       // Resetar valor da doação
       setDonationAmount(0);
       
-      toast({
-        title: 'Doação realizada!',
-        description: `Sua doação de R$ ${donationAmount.toFixed(2)} foi realizada com sucesso!`,
-      });
     } catch (err: any) {
-      console.error('Erro ao fazer doação:', err);
+      console.error('Erro ao registrar doação:', err);
       toast({
-        title: 'Erro ao fazer doação',
-        description: err.message || 'Não foi possível processar sua doação.',
+        title: 'Erro ao registrar doação',
+        description: err.message || 'O pagamento foi processado, mas houve um erro ao registrar sua doação.',
         variant: 'destructive'
       });
+    } finally {
+      setIsPaymentProcessing(false);
     }
   };
   
@@ -564,7 +589,7 @@ export default function CampaignDetail() {
                         {showDonationSuccess ? (
                           <div className="text-center py-8">
                             <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Heart className="w-8 h-8 text-green-500" />
+                              <CheckCircle className="w-8 h-8 text-green-500" />
                             </div>
                             <h3 className="text-xl font-bold text-white mb-2">Obrigado pela sua doação!</h3>
                             <p className="text-gray-300 mb-6">
@@ -576,6 +601,17 @@ export default function CampaignDetail() {
                             >
                               Fechar
                             </Button>
+                          </div>
+                        ) : isStripeOpen ? (
+                          <div className="py-4">
+                            <StripeProvider amount={donationAmount} campaignId={campaign.id}>
+                              <StripeCheckout 
+                                amount={donationAmount} 
+                                campaignId={campaign.id}
+                                onSuccess={handlePaymentSuccess}
+                                onCancel={() => setIsStripeOpen(false)}
+                              />
+                            </StripeProvider>
                           </div>
                         ) : (
                           <div className="space-y-4 py-4">
@@ -612,8 +648,24 @@ export default function CampaignDetail() {
                               disabled={!donationAmount || donationAmount <= 0}
                               className="w-full mt-4 bg-primary hover:bg-primary/90"
                             >
-                              Confirmar Doação
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              Pagar R$ {donationAmount || 0}
                             </Button>
+                            
+                            <div className="mt-4 text-xs text-gray-400">
+                              <p className="flex items-center mb-1">
+                                <svg className="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 32 32" fill="currentColor">
+                                  <path d="M25.6 12.8H6.4v-3.2h19.2v3.2zm0 3.2H6.4v3.2h19.2V16zm-9.6 6.4h-9.6v3.2h9.6v-3.2zm19.2-16v19.2c0 1.8-1.4 3.2-3.2 3.2H6.4c-1.8 0-3.2-1.4-3.2-3.2V6.4c0-1.8 1.4-3.2 3.2-3.2h25.6c1.8 0 3.2 1.4 3.2 3.2z"/>
+                                </svg>
+                                Pagamento 100% seguro
+                              </p>
+                              <p className="flex items-center">
+                                <svg className="h-4 w-4 mr-1 text-gray-400" viewBox="0 0 32 32" fill="currentColor">
+                                  <path d="M16 2C8.3 2 2 8.3 2 16s6.3 14 14 14 14-6.3 14-14S23.7 2 16 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm4 16H12v-2h2v-6h-2v-2h6v8h2v2z"/>
+                                </svg>
+                                Processado com segurança pelo Stripe
+                              </p>
+                            </div>
                           </div>
                         )}
                       </DialogContent>
