@@ -1,634 +1,576 @@
-import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { Heart, Award, Calendar, Activity, Users, TrendingUp, Star, Gift, Share, HeartPulse } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AchievementGrid } from '@/components/gamification/AchievementGrid';
-import { UserLevel } from '@/components/gamification/UserLevel';
-import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
-import { predefinedAchievements, AchievementCategory, type PointHistory } from '@shared/achievements';
-import { createGamificationTables } from '@/migrations/createGameTables';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AchievementBadge } from '@/components/gamification/AchievementBadge';
+import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
+import { UserLevel } from '@/components/gamification/UserLevel';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { supabase } from '@/lib/supabase';
+import { predefinedAchievements } from '@shared/achievements';
+import { createGamificationTables } from '@/migrations/createGameTables';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Trophy,
-  History,
-  User as UserIcon,
-  Settings,
-  Heart,
-  Gift
-} from 'lucide-react';
 
 export default function UserProfile() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [showDemo, setShowDemo] = useState(false);
-  const [selectedAchievement, setSelectedAchievement] = useState<number | null>(null);
-  
-  // Estados para armazenar dados reais do usuário
+  const [userLevel, setUserLevel] = useState<{ level: number, progress: number, totalPoints: number }>({ 
+    level: 1, 
+    progress: 0,
+    totalPoints: 0
+  });
   const [userPoints, setUserPoints] = useState(0);
   const [donationCount, setDonationCount] = useState(0);
   const [totalDonated, setTotalDonated] = useState(0);
-  const [userLevel, setUserLevel] = useState({ level: 1, progress: 0, totalPoints: 0 });
   const [userAchievements, setUserAchievements] = useState<any[]>([]);
   const [activityHistory, setActivityHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+  const [showDemo, setShowDemo] = useState(false);
   
-  // Busca dados do usuário do banco de dados
-  // Função para lidar com os casos em que as tabelas ainda não existem
-  async function handleGamificationData() {
-    // Usar valores simulados para demonstrar como o sistema funcionará
-    // quando as tabelas estiverem configuradas corretamente
+  // Função para buscar dados do usuário do banco de dados
+  async function fetchUserGamificationData() {
+    if (!user?.id) return;
     
-    // Nível e progresso simulados para o usuário
-    setUserLevel({ 
-      level: 2, 
-      progress: 65, 
-      totalPoints: 150 
-    });
-    
-    // Pontos simulados para demonstração
-    setUserPoints(150);
-    
-    // Doações simuladas para demonstração
-    const mockDonations = await getMockDonations();
-    setDonationCount(mockDonations.count || 3);
-    setTotalDonated(mockDonations.total || 75.50);
-    
-    // Conquistas simuladas para demonstração
-    setUserAchievements(predefinedAchievements.slice(0, 4).map(achievement => ({
-      ...achievement,
-      id: achievement.id || Math.floor(Math.random() * 1000),
-      requiredPoints: achievement.requiredPoints || 100,
-      isSecret: achievement.isSecret || false,
-      createdAt: achievement.createdAt || new Date()
-    })));
-    
-    // Histórico de atividades simulado
-    setActivityHistory([
-      {
-        id: 1,
-        date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        action: "Doação realizada",
-        points: 50,
-        category: "donation"
-      },
-      {
-        id: 2,
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        action: "Doação recebida",
-        points: 20,
-        category: "donation"
-      },
-      {
-        id: 3,
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        action: "Campanha compartilhada",
-        points: 30,
-        category: "sharing"
-      },
-      {
-        id: 4,
-        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        action: "Primeiro acesso ao sistema",
-        points: 50,
-        category: "engagement"
-      }
-    ]);
-  }
-  
-  // Função auxiliar para obter dados de doações para demonstração
-  async function getMockDonations() {
     try {
-      // Tentar obter dados reais primeiro
-      if (user?.id) {
-        const { data } = await supabase
-          .from('donations')
-          .select('amount')
-          .eq('donor_id', user.id);
+      // 1. Buscar nível do usuário da tabela user_levels
+      const { data: levelData, error: levelError } = await supabase
+        .from('user_levels')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
         
-        if (data && data.length > 0) {
-          const total = data.reduce((sum, donation) => sum + (donation.amount || 0), 0);
-          return { count: data.length, total };
+      if (levelError && levelError.code !== 'PGRST116') {
+        console.error('Erro ao buscar nível do usuário:', levelError);
+      }
+      
+      // Se encontrou dados do nível do usuário, atualizamos o estado
+      if (levelData) {
+        setUserLevel({
+          level: levelData.level,
+          progress: levelData.progress,
+          totalPoints: levelData.total_points
+        });
+        setUserPoints(levelData.total_points);
+      } else {
+        // Se não existe ainda, criar um registro inicial
+        const initialLevel = { level: 1, progress: 0, totalPoints: 0 };
+        setUserLevel(initialLevel);
+        setUserPoints(0);
+        
+        // Inserir nível inicial no banco de dados
+        const { error: insertError } = await supabase
+          .from('user_levels')
+          .insert({
+            user_id: user.id,
+            level: 1,
+            total_points: 0,
+            progress: 0
+          });
+          
+        if (insertError) {
+          console.error('Erro ao inserir nível inicial do usuário:', insertError);
         }
       }
+      
+      // 2. Buscar conquistas do usuário
+      const { data: achievementsData, error: achievementsError } = await supabase
+        .from('user_achievements')
+        .select(`
+          *,
+          achievement:achievement_id(*)
+        `)
+        .eq('user_id', user.id);
+        
+      if (achievementsError) {
+        console.error('Erro ao buscar conquistas do usuário:', achievementsError);
+      }
+      
+      // Se encontrou conquistas, mapeamos para o formato correto
+      if (achievementsData && achievementsData.length > 0) {
+        const userAchievementsList = achievementsData.map((item) => {
+          const achievement = item.achievement;
+          return {
+            id: achievement.id,
+            name: achievement.name,
+            description: achievement.description,
+            icon: achievement.icon,
+            category: achievement.category,
+            requiredPoints: achievement.required_points,
+            isSecret: achievement.is_secret,
+            createdAt: achievement.created_at
+          };
+        });
+        
+        setUserAchievements(userAchievementsList);
+      } else {
+        // Se não tem conquistas, verificar se precisa desbloquear a primeira
+        if (levelData && levelData.total_points >= 50) {
+          const { data: firstAchievement } = await supabase
+            .from('achievements')
+            .select('*')
+            .eq('name', 'Primeira Doação')
+            .single();
+            
+          if (firstAchievement) {
+            setUserAchievements([{
+              id: firstAchievement.id,
+              name: firstAchievement.name,
+              description: firstAchievement.description,
+              icon: firstAchievement.icon,
+              category: firstAchievement.category,
+              requiredPoints: firstAchievement.required_points,
+              isSecret: firstAchievement.is_secret,
+              createdAt: firstAchievement.created_at
+            }]);
+          } else {
+            setUserAchievements([]);
+          }
+        } else {
+          setUserAchievements([]);
+        }
+      }
+      
+      // 3. Buscar histórico de pontos
+      const { data: historyData, error: historyError } = await supabase
+        .from('points_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+        
+      if (historyError) {
+        console.error('Erro ao buscar histórico de pontos:', historyError);
+      }
+      
+      if (historyData && historyData.length > 0) {
+        const formattedHistory = historyData.map(item => ({
+          id: item.id,
+          date: new Date(item.created_at),
+          action: item.description,
+          points: item.amount,
+          category: item.category
+        }));
+        
+        setActivityHistory(formattedHistory);
+      } else {
+        // Histórico vazio
+        setActivityHistory([]);
+      }
+      
+      // 4. Buscar contagem e valor total de doações
+      const { data: donationsData, error: donationsError } = await supabase
+        .from('donations')
+        .select('amount')
+        .eq('donor_id', user.id);
+        
+      if (donationsError) {
+        console.error('Erro ao buscar doações:', donationsError);
+      }
+      
+      if (donationsData && donationsData.length > 0) {
+        const total = donationsData.reduce((sum, donation) => sum + (donation.amount || 0), 0);
+        setDonationCount(donationsData.length);
+        setTotalDonated(total / 100); // Converter de centavos para reais
+      } else {
+        setDonationCount(0);
+        setTotalDonated(0);
+      }
+      
     } catch (error) {
-      console.log("Erro ao buscar doações reais, usando valores simulados");
+      console.error('Erro ao buscar dados de gamificação:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Retornar valores padrão se não conseguir obter dados reais
-    return { count: 3, total: 75.50 };
   }
   
   // Efeito para garantir que o usuário tenha dados de gamificação
   useEffect(() => {
     if (!user?.id) return;
     
-    async function fetchUserData() {
+    // Função principal para carregar dados do usuário
+    async function loadUserData() {
       setIsLoading(true);
+      
       try {
-        // Tentar carregar os dados do usuário
-        // Se ocorrer um erro relacionado a tabelas ausentes, usar handleGamificationData
+        // Tentar criar as tabelas necessárias
+        await createGamificationTables();
         
-        try {
-          // Tentar criar as tabelas necessárias primeiro
-          const tablesCreated = await createGamificationTables();
-          console.log('Tabelas criadas com sucesso?', tablesCreated);
-        } catch (createError) {
-          console.error('Erro ao criar tabelas:', createError);
-        }
-        
-        // 1. Buscar nível do usuário
-        const { data: levelData, error: levelError } = await supabase
-          .from('user_levels')
-          .select('*')
-          .eq('user_id', user?.id || '')
-          .single();
-          
-        if (levelError) {
-          console.error('Erro ao buscar nível do usuário:', levelError);
-          
-          // Se houver qualquer erro (incluindo tabela não existente),
-          // configuramos dados padrão para manter a interface funcionando
-          console.log('Erro ao buscar dados do usuário, usando valores padrão');
-          await handleGamificationData();
-          setIsLoading(false);
-          return; // Interromper a execução para não continuar com outras consultas
-        }
-        
-        // Se o usuário não tem nível registrado, cria um nível inicial
-        if (!levelData) {
-          // Calcular pontos com base nas doações e inserir nível inicial
-          const { data: donationsData } = await supabase
-            .from('donations')
-            .select('amount')
-            .eq('user_id', user.id);
-            
-          const { data: receivedDonations } = await supabase
-            .from('donations')
-            .select('id')
-            .in('campaign_id', 
-              // Subconsulta para obter IDs de campanhas do usuário
-              supabase
-                .from('campaigns')
-                .select('id')
-                .eq('creator_id', user.id)
-            );
-            
-          // Calcular pontos totais: 50 por doação feita + 20 por doação recebida
-          const donationsMade = donationsData?.length || 0;
-          const donationsReceived = receivedDonations?.length || 0;
-          const calculatedPoints = (donationsMade * 50) + (donationsReceived * 20);
-          
-          // Inserir registro de nível
-          const { data: newLevel, error: insertError } = await supabase
-            .from('user_levels')
-            .insert({
-              user_id: user.id,
-              total_points: calculatedPoints,
-              level: calculateLevel(calculatedPoints),
-              progress: calculateProgress(calculatedPoints)
-            })
-            .select()
-            .single();
-            
-          if (insertError) {
-            console.error('Erro ao criar nível do usuário:', insertError);
-          } else if (newLevel) {
-            setUserLevel(newLevel);
-            setUserPoints(newLevel.total_points);
-          }
-        } else {
-          // Usar dados existentes
-          setUserLevel(levelData);
-          setUserPoints(levelData.total_points);
-        }
-        
-        // 2. Buscar total de doações feitas pelo usuário
-        const { data: userDonations, error: donationsError } = await supabase
-          .from('donations')
-          .select('amount')
-          .eq('user_id', user.id);
-          
-        if (donationsError) {
-          console.error('Erro ao buscar doações do usuário:', donationsError);
-        } else if (userDonations) {
-          setDonationCount(userDonations.length);
-          // Somar os valores das doações
-          const total = userDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0);
-          setTotalDonated(total);
-        }
-        
-        // 3. Buscar conquistas do usuário
-        const { data: achievements, error: achievementsError } = await supabase
-          .from('user_achievements')
-          .select('*')
-          .eq('user_id', user.id);
-          
-        if (achievementsError) {
-          console.error('Erro ao buscar conquistas do usuário:', achievementsError);
-        } else if (achievements) {
-          setUserAchievements(achievements);
-        }
-        
-        // 4. Buscar histórico de pontos/atividades
-        const { data: history, error: historyError } = await supabase
-          .from('points_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
-          
-        if (historyError) {
-          console.error('Erro ao buscar histórico de atividades:', historyError);
-        } else if (history) {
-          // Mapear histórico para o formato esperado pelo componente
-          const formattedHistory = history.map(item => ({
-            id: item.id,
-            type: item.category,
-            description: item.description,
-            points: item.points,
-            date: item.created_at
-          }));
-          setActivityHistory(formattedHistory);
-        }
-        
+        // Buscar dados do usuário do banco de dados
+        await fetchUserGamificationData();
       } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Ocorreu um erro ao buscar seus dados. Tente novamente mais tarde.",
-          variant: "destructive"
-        });
-      } finally {
+        console.error('Erro ao carregar dados do usuário:', error);
         setIsLoading(false);
       }
     }
     
-    fetchUserData();
-  }, [user, toast]);
+    // Carregar dados do usuário
+    loadUserData();
+  }, [user]);
   
-  // Função para calcular o nível com base nos pontos
+  // Funções auxiliares para cálculos de nível e progresso
   function calculateLevel(points: number): number {
-    const levelDefinitions = [
-      { level: 1, pointsRequired: 0 },
-      { level: 2, pointsRequired: 100 },
-      { level: 3, pointsRequired: 250 },
-      { level: 4, pointsRequired: 500 },
-      { level: 5, pointsRequired: 1000 },
-      { level: 6, pointsRequired: 2000 },
-      { level: 7, pointsRequired: 4000 },
-      { level: 8, pointsRequired: 7000 },
-      { level: 9, pointsRequired: 10000 },
-      { level: 10, pointsRequired: 15000 },
-    ];
+    // Cada nível requer 100 pontos adicionais
+    // Nível 1: 0-99 pontos
+    // Nível 2: 100-299 pontos
+    // Nível 3: 300-599 pontos
+    // Etc.
     
-    // Encontrar o nível correspondente aos pontos
-    const currentLevel = [...levelDefinitions].reverse().find(
-      level => points >= level.pointsRequired
-    );
-    
-    return currentLevel?.level || 1;
+    if (points < 100) return 1;
+    if (points < 300) return 2;
+    if (points < 600) return 3;
+    if (points < 1000) return 4;
+    if (points < 1500) return 5;
+    if (points < 2100) return 6;
+    if (points < 2800) return 7;
+    if (points < 3600) return 8;
+    if (points < 4500) return 9;
+    return 10; // Máximo nível 10 para pontuações acima de 4500
   }
   
-  // Função para obter o título do nível
   function getLevelTitle(level: number): string {
-    const titles = {
-      1: "Iniciante",
-      2: "Apoiador",
-      3: "Colaborador",
-      4: "Benfeitor",
-      5: "Filantropo",
-      6: "Humanitário",
-      7: "Altruísta",
-      8: "Benemérito",
-      9: "Visionário",
-      10: "Lenda"
-    };
-    
-    return titles[level as keyof typeof titles] || "Iniciante";
-  }
-  
-  // Função para calcular o progresso percentual para o próximo nível
-  function calculateProgress(points: number): number {
-    const levelDefinitions = [
-      { level: 1, pointsRequired: 0 },
-      { level: 2, pointsRequired: 100 },
-      { level: 3, pointsRequired: 250 },
-      { level: 4, pointsRequired: 500 },
-      { level: 5, pointsRequired: 1000 },
-      { level: 6, pointsRequired: 2000 },
-      { level: 7, pointsRequired: 4000 },
-      { level: 8, pointsRequired: 7000 },
-      { level: 9, pointsRequired: 10000 },
-      { level: 10, pointsRequired: 15000 },
+    const titles = [
+      "Iniciante",
+      "Apoiador",
+      "Contribuinte",
+      "Benfeitor",
+      "Filantropo",
+      "Patrono",
+      "Humanitário",
+      "Visionário",
+      "Embaixador",
+      "Lenda"
     ];
     
-    // Encontrar nível atual e próximo nível
-    const currentLevelData = [...levelDefinitions].reverse().find(
-      level => points >= level.pointsRequired
-    ) || levelDefinitions[0];
-    
-    const nextLevelIndex = levelDefinitions.findIndex(
-      level => level.level === currentLevelData.level
-    ) + 1;
-    
-    const nextLevelData = nextLevelIndex < levelDefinitions.length 
-      ? levelDefinitions[nextLevelIndex] 
-      : null;
-    
-    // Se já está no nível máximo, retorna 100%
-    if (!nextLevelData) return 100;
-    
-    // Calcular progresso percentual
-    const currentLevelPoints = currentLevelData.pointsRequired;
-    const nextLevelPoints = nextLevelData.pointsRequired;
-    const pointsRange = nextLevelPoints - currentLevelPoints;
-    const userPointsInRange = points - currentLevelPoints;
-    
-    return Math.min(100, Math.round((userPointsInRange / pointsRange) * 100));
+    return titles[Math.min(level - 1, titles.length - 1)];
   }
   
-  // Mostra o modal de conquista desbloqueada após 1 segundo - apenas para demonstração
-  useEffect(() => {
-    if (showDemo) {
-      const timer = setTimeout(() => {
-        setSelectedAchievement(3); // ID da conquista para mostrar
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showDemo]);
+  function calculateProgress(points: number): number {
+    // Calcula a porcentagem de progresso para o próximo nível
+    const level = calculateLevel(points);
+    
+    // Pontos necessários para cada nível
+    const levelThresholds = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500];
+    
+    // Se estiver no nível máximo, retorna 100%
+    if (level >= 10) return 100;
+    
+    // Calcula quantos pontos já foram obtidos dentro do nível atual
+    const pointsInCurrentLevel = points - levelThresholds[level - 1];
+    
+    // Calcula quantos pontos são necessários para passar para o próximo nível
+    const pointsNeededForNextLevel = levelThresholds[level] - levelThresholds[level - 1];
+    
+    // Calcula a porcentagem de progresso
+    return Math.min(Math.round((pointsInCurrentLevel / pointsNeededForNextLevel) * 100), 100);
+  }
+  
+  // Exibe uma conquista específica
+  function handleShowAchievement(achievement: any) {
+    setSelectedAchievement(achievement);
+    setShowDemo(true);
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
   
   return (
-    <>
+    <div className="container px-4 py-8 mx-auto">
       <Helmet>
-        <title>Meu Perfil | DoeAqui</title>
-        <meta 
-          name="description" 
-          content="Veja suas conquistas, estatísticas de doações e gerencia seu perfil na plataforma DoeAqui."
-        />
+        <title>Perfil do Usuário | DoeAqui</title>
+        <meta name="description" content="Visualize seu perfil, estatísticas e conquistas na plataforma DoeAqui." />
       </Helmet>
       
-      <div className="min-h-screen grid-background w-full">
-        {/* Efeitos de background */}
-        <div className="absolute -z-10 top-0 right-0 w-full h-full overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 blur-[120px] rounded-full bg-primary/30 -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 blur-[120px] rounded-full bg-secondary/30 -ml-20 -mb-20"></div>
+      <div className="grid gap-8 md:grid-cols-12">
+        {/* Sidebar com informações do perfil */}
+        <div className="flex flex-col gap-6 md:col-span-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={user?.avatar_url || ''} alt={user?.name || 'Usuário'} />
+                  <AvatarFallback>{user?.name?.substring(0, 2) || 'US'}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle>{user?.name || 'Usuário'}</CardTitle>
+                  <CardDescription>{user?.email}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4">
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Nível {userLevel.level}</span>
+                    <span className="font-medium">{getLevelTitle(userLevel.level)}</span>
+                  </div>
+                  <Progress value={userLevel.progress} className="h-2" />
+                  <div className="flex items-center justify-between text-xs">
+                    <span>{userLevel.totalPoints} pontos</span>
+                    <span>{userLevel.progress}% para o próximo nível</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div className="flex flex-col items-center p-3 bg-muted rounded-lg">
+                    <Heart className="w-5 h-5 mb-1 text-primary" />
+                    <span className="text-xl font-bold">{donationCount}</span>
+                    <span className="text-xs text-muted-foreground">Doações</span>
+                  </div>
+                  <div className="flex flex-col items-center p-3 bg-muted rounded-lg">
+                    <Award className="w-5 h-5 mb-1 text-primary" />
+                    <span className="text-xl font-bold">{userAchievements.length}</span>
+                    <span className="text-xs text-muted-foreground">Conquistas</span>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Estatísticas</h3>
+                  <div className="grid gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">Total doado</span>
+                      </div>
+                      <span className="font-medium">R$ {totalDonated.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">Pontos</span>
+                      </div>
+                      <span className="font-medium">{userPoints}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">Membro desde</span>
+                      </div>
+                      <span className="font-medium">
+                        {user?.created_at 
+                          ? new Date(user.created_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'short' }) 
+                          : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <Button variant="outline" className="mt-2">
+                  Editar Perfil
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Suas Conquistas</CardTitle>
+              <CardDescription>
+                Conquistas desbloqueadas por suas atividades
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {userAchievements.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {userAchievements.slice(0, 4).map((achievement) => (
+                    <AchievementBadge 
+                      key={achievement.id} 
+                      achievement={achievement} 
+                      size="md"
+                      showTooltip
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <Award className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="mb-1 font-medium">Sem conquistas ainda</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Continue participando para desbloquear conquistas
+                  </p>
+                </div>
+              )}
+              
+              {userAchievements.length > 0 && (
+                <Button variant="link" className="w-full mt-2">
+                  Ver todas as conquistas
+                </Button>
+              )}
+            </CardContent>
+          </Card>
         </div>
         
-        <div className="container mx-auto w-full max-w-[1200px] px-4 py-20">
-          {/* Cabeçalho do perfil */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex flex-col lg:flex-row gap-6 mb-8">
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full border-4 border-primary/30 overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900">
-                  {user?.avatar_url ? (
-                    <img 
-                      src={user.avatar_url} 
-                      alt={user?.name || 'Usuário'} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <UserIcon size={40} className="text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                
-                <div className="absolute -bottom-3 -right-3 bg-primary text-white text-xs font-bold rounded-full h-8 w-8 flex items-center justify-center shadow-lg shadow-primary/20 border-2 border-background">
-                  <Trophy size={14} />
-                </div>
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-end gap-4 mb-2">
-                  <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white">
-                      {user?.name || 'Usuário DoeAqui'}
-                    </h1>
-                    <p className="text-gray-400">Membro desde {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'recentemente'}</p>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                      <Trophy size={12} className="mr-1" /> Nível {userLevel.level}: {getLevelTitle(userLevel.level)}
-                    </Badge>
-                    <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">
-                      <Heart size={12} className="mr-1" /> {donationCount} Doações
-                    </Badge>
-                    <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
-                      <Gift size={12} className="mr-1" /> {userAchievements.length} Conquistas
-                    </Badge>
-                  </div>
-                </div>
-                
-                {/* Resumo dos pontos e conquistas */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Total de Pontos</h3>
-                    <p className="text-xl font-bold text-white">{isLoading ? "..." : userPoints}</p>
-                  </div>
-                  
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Campanhas Apoiadas</h3>
-                    <p className="text-xl font-bold text-white">{isLoading ? "..." : donationCount}</p>
-                  </div>
-                  
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Total Doado</h3>
-                    <p className="text-xl font-bold text-white">
-                      {isLoading ? "..." : `R$ ${totalDonated.toFixed(2)}`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Botão para demonstração do sistema de conquistas - apenas para protótipo */}
-          {!showDemo && (
-            <div className="mb-8">
-              <button
-                onClick={() => setShowDemo(true)}
-                className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg px-4 py-2 text-sm"
-              >
-                Demonstrar Sistema de Conquistas
-              </button>
-            </div>
-          )}
-          
-          {/* Nível de usuário */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-8"
-          >
-            <UserLevel totalPoints={userPoints} />
-          </motion.div>
-          
-          {/* Conteúdo em abas */}
-          <Tabs defaultValue="achievements">
-            <TabsList className="w-full max-w-md mx-auto mb-8 grid grid-cols-3">
-              <TabsTrigger value="achievements" className="data-[state=active]:text-primary">
-                <Trophy size={16} className="mr-2" />
-                Conquistas
-              </TabsTrigger>
-              <TabsTrigger value="history" className="data-[state=active]:text-primary">
-                <History size={16} className="mr-2" />
-                Atividades
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="data-[state=active]:text-primary">
-                <Settings size={16} className="mr-2" />
-                Configurações
-              </TabsTrigger>
+        {/* Conteúdo principal */}
+        <div className="md:col-span-8">
+          <Tabs defaultValue="activities">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="activities">Atividades</TabsTrigger>
+              <TabsTrigger value="achievements">Conquistas</TabsTrigger>
+              <TabsTrigger value="campaigns">Campanhas</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="achievements" className="focus-visible:outline-none">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <AchievementGrid 
-                  achievements={predefinedAchievements}
-                  userAchievements={userAchievements}
-                  showLockedAchievements={true}
-                  showSecretAchievements={false}
-                />
-              </motion.div>
-            </TabsContent>
-            
-            <TabsContent value="history" className="focus-visible:outline-none">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-4 max-w-3xl mx-auto"
-              >
-                <h2 className="text-xl font-bold text-white mb-4">Histórico de Atividades</h2>
-                
-                {activityHistory.map((activity) => (
-                  <div 
-                    key={activity.id}
-                    className="glass-card p-4 rounded-lg border border-white/5 flex items-center gap-4"
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      activity.type === 'donation' ? 'bg-primary/20 text-primary' :
-                      activity.type === 'achievement' ? 'bg-secondary/20 text-secondary' :
-                      activity.type === 'sharing' ? 'bg-accent/20 text-accent' :
-                      'bg-gray-700 text-gray-300'
-                    }`}>
-                      {activity.type === 'donation' ? <Heart size={18} /> :
-                       activity.type === 'achievement' ? <Trophy size={18} /> :
-                       activity.type === 'sharing' ? <Gift size={18} /> :
-                       <UserIcon size={18} />}
+            <TabsContent value="activities" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Atividades</CardTitle>
+                  <CardDescription>
+                    Veja seu histórico de participação
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {activityHistory.length > 0 ? (
+                    <div className="space-y-6">
+                      {activityHistory.map((activity) => (
+                        <div key={activity.id} className="flex items-start gap-4">
+                          <div className="flex-shrink-0 p-2 bg-primary/10 rounded-full">
+                            {activity.category === 'donation' ? (
+                              <Heart className="w-5 h-5 text-primary" />
+                            ) : activity.category === 'sharing' ? (
+                              <Share className="w-5 h-5 text-primary" />
+                            ) : (
+                              <Activity className="w-5 h-5 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-medium">{activity.action}</h4>
+                              <Badge variant="outline">+{activity.points} pts</Badge>
+                            </div>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {activity.date.toLocaleDateString('pt-BR', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    
-                    <div className="flex-1">
-                      <p className="text-white">{activity.description}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(activity.date).toLocaleString('pt-BR', { 
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                  ) : (
+                    <div className="py-12 text-center">
+                      <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="mb-2 text-xl font-medium">Nenhuma atividade recente</h3>
+                      <p className="text-muted-foreground">
+                        Suas atividades como doações e interações aparecerão aqui
                       </p>
                     </div>
-                    
-                    <div className="text-right">
-                      <span className="text-primary font-medium">+{activity.points} pts</span>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
             
-            <TabsContent value="settings" className="focus-visible:outline-none">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-3xl mx-auto"
-              >
-                <h2 className="text-xl font-bold text-white mb-6">Configurações de Gamificação</h2>
-                
-                <div className="space-y-4">
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-white font-medium">Notificações de Conquistas</h3>
-                        <p className="text-sm text-gray-400">Receba notificações quando desbloquear novas conquistas</p>
-                      </div>
-                      <div className="relative">
-                        <input type="checkbox" id="notifications" className="peer sr-only" defaultChecked />
-                        <label 
-                          htmlFor="notifications" 
-                          className="flex w-11 h-6 bg-gray-600 rounded-full cursor-pointer peer-checked:bg-primary transition-colors duration-300"
+            <TabsContent value="achievements" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Suas Conquistas</CardTitle>
+                  <CardDescription>
+                    Acompanhe seu progresso e desbloqueie novas conquistas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {userAchievements.length > 0 ? (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {userAchievements.map((achievement) => (
+                        <div 
+                          key={achievement.id}
+                          className="flex items-center gap-3 p-3 transition-colors border rounded-lg cursor-pointer hover:bg-accent"
+                          onClick={() => handleShowAchievement(achievement)}
                         >
-                          <span className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 peer-checked:left-[calc(100%-21px)] transition-all duration-300"></span>
-                        </label>
-                      </div>
+                          <div className="flex items-center justify-center w-10 h-10 bg-primary/10 rounded-full">
+                            {achievement.icon === 'heart' ? (
+                              <Heart className="w-5 h-5 text-primary" />
+                            ) : achievement.icon === 'users' ? (
+                              <Users className="w-5 h-5 text-primary" />
+                            ) : achievement.icon === 'heart-pulse' ? (
+                              <HeartPulse className="w-5 h-5 text-primary" />
+                            ) : (
+                              <Award className="w-5 h-5 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{achievement.name}</h4>
+                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <Badge variant="outline" className="mb-1">
+                              {achievement.category === 'donation' ? 'Doação' : 
+                               achievement.category === 'sharing' ? 'Compartilhamento' : 
+                               'Engajamento'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(achievement.createdAt).toLocaleDateString('pt-BR', { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <Award className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="mb-2 text-xl font-medium">Nenhuma conquista desbloqueada</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Continue participando para desbloquear conquistas
+                      </p>
+                      <Button variant="outline">Ver conquistas disponíveis</Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="campaigns" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Campanhas que você apoia</CardTitle>
+                  <CardDescription>
+                    Campanhas que você criou ou contribuiu
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="py-12 text-center">
+                    <Gift className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="mb-2 text-xl font-medium">Nenhuma campanha ativa</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Você ainda não criou ou apoiou nenhuma campanha
+                    </p>
+                    <div className="flex flex-col gap-2 max-w-xs mx-auto">
+                      <Button>Criar uma campanha</Button>
+                      <Button variant="outline">Explorar campanhas</Button>
                     </div>
                   </div>
-                  
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-white font-medium">Mostrar Conquistas no Perfil Público</h3>
-                        <p className="text-sm text-gray-400">Permite que outros usuários vejam suas conquistas</p>
-                      </div>
-                      <div className="relative">
-                        <input type="checkbox" id="public_achievements" className="peer sr-only" defaultChecked />
-                        <label 
-                          htmlFor="public_achievements" 
-                          className="flex w-11 h-6 bg-gray-600 rounded-full cursor-pointer peer-checked:bg-primary transition-colors duration-300"
-                        >
-                          <span className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 peer-checked:left-[calc(100%-21px)] transition-all duration-300"></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="glass-card p-4 rounded-lg border border-white/5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-white font-medium">Mostrar Conquistas Secretas</h3>
-                        <p className="text-sm text-gray-400">Exibe conquistas secretas não desbloqueadas</p>
-                      </div>
-                      <div className="relative">
-                        <input type="checkbox" id="show_secret" className="peer sr-only" />
-                        <label 
-                          htmlFor="show_secret" 
-                          className="flex w-11 h-6 bg-gray-600 rounded-full cursor-pointer peer-checked:bg-primary transition-colors duration-300"
-                        >
-                          <span className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5 peer-checked:left-[calc(100%-21px)] transition-all duration-300"></span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
       </div>
       
-      {/* Modal de conquista desbloqueada */}
-      {selectedAchievement !== null && (
+      {showDemo && selectedAchievement && (
         <AchievementUnlock 
-          achievement={predefinedAchievements.find(a => a.id === selectedAchievement) || predefinedAchievements[0]}
-          onClose={() => setSelectedAchievement(null)}
+          achievement={selectedAchievement}
+          onClose={() => setShowDemo(false)}
         />
       )}
-    </>
+    </div>
   );
 }
