@@ -6,6 +6,7 @@ import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserLevel } from '@/components/gamification/UserLevel';
 import { Link } from 'wouter';
+import { supabase } from '@/lib/supabase';
 import { 
   HeartIcon, 
   Award, 
@@ -54,7 +55,7 @@ export default function Dashboard() {
     setHideCampaignValues(!hideCampaignValues);
   };
   
-  // Verificar se é a primeira vez do usuário e mostrar mensagem de boas-vindas
+  // Carregar os dados de doações e estatísticas do usuário
   useEffect(() => {
     if (!isLoading && user) {
       // Verificar se é a primeira visita do usuário
@@ -68,6 +69,66 @@ export default function Dashboard() {
         // Marcar que o usuário já recebeu as boas-vindas
         localStorage.setItem(`doeaqui-user-welcomed-${user.id}`, 'true');
       }
+      
+      // Buscar estatísticas reais de doações
+      const fetchUserStats = async () => {
+        setIsLoadingStats(true);
+        try {
+          // 1. Buscar total doado pelo usuário
+          const { data: userDonations, error: donationsError } = await supabase
+            .from('donations')
+            .select('amount')
+            .eq('user_id', user.id);
+          
+          if (donationsError) throw donationsError;
+          
+          // Calcular total doado e contagem de doações
+          const totalAmount = userDonations.reduce((sum, donation) => sum + donation.amount, 0);
+          setTotalDonated(totalAmount);
+          setDonationCount(userDonations.length);
+          
+          // 2. Buscar campanhas do usuário
+          const { data: userCampaigns, error: campaignsError } = await supabase
+            .from('campaigns')
+            .select('id, raised')
+            .eq('user_id', user.id);
+          
+          if (campaignsError) throw campaignsError;
+          
+          // 3. Para cada campanha, buscar doações recebidas
+          let totalRaised = 0;
+          let totalDonationsReceived = 0;
+          
+          if (userCampaigns && userCampaigns.length > 0) {
+            // Somar os valores arrecadados de todas as campanhas do usuário
+            totalRaised = userCampaigns.reduce((sum, campaign) => sum + (campaign.raised || 0), 0);
+            
+            // Contar o número total de doações recebidas
+            const campaignIds = userCampaigns.map(campaign => campaign.id);
+            const { data: receivedDonations, error: receivedError } = await supabase
+              .from('donations')
+              .select('id')
+              .in('campaign_id', campaignIds);
+            
+            if (!receivedError && receivedDonations) {
+              totalDonationsReceived = receivedDonations.length;
+            }
+          }
+          
+          setTotalReceived(totalRaised);
+          setReceivedDonationCount(totalDonationsReceived);
+          
+          // 4. Definir pontos do usuário (podemos calcular baseado em atividades ou usar um valor fixo temporariamente)
+          setUserPoints(totalDonationsReceived * 20 + userDonations.length * 50);
+          
+        } catch (err) {
+          console.error('Erro ao carregar estatísticas:', err);
+        } finally {
+          setIsLoadingStats(false);
+        }
+      };
+      
+      fetchUserStats();
     }
   }, [user, isLoading]);
   
@@ -78,12 +139,13 @@ export default function Dashboard() {
     }
   }, [user, isLoading, setLocation]);
   
-  // Dados simulados para demonstração
-  const mockUserPoints = 750;
-  const mockDonationCount = 8;
-  const mockTotalDonated = 1250;
-  const mockTotalReceived = 2750;
-  const mockReceivedDonationCount = 12;
+  // Estados para armazenar os dados reais
+  const [userPoints, setUserPoints] = useState(0);
+  const [donationCount, setDonationCount] = useState(0);
+  const [totalDonated, setTotalDonated] = useState(0);
+  const [totalReceived, setTotalReceived] = useState(0);
+  const [receivedDonationCount, setReceivedDonationCount] = useState(0);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   
   // Campanhas recentes de exemplo
   const recentCampaigns = [
@@ -301,7 +363,7 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <p className="text-gray-400 text-sm">Total de Pontos</p>
-                      <h3 className="text-2xl font-bold text-white">{mockUserPoints}</h3>
+                      <h3 className="text-2xl font-bold text-white">{userPoints}</h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                       <Award className="h-6 w-6 text-primary" />
