@@ -108,11 +108,11 @@ export default function NewCampaign() {
       // Gerar nome único para o arquivo
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-      const filePath = `campaign_images/${fileName}`;
+      const filePath = `campaign-images/${fileName}`;
       
       // Fazer upload para o Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('campaign_images')
+        .from('campaign-images')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -124,7 +124,7 @@ export default function NewCampaign() {
       
       // Obter a URL pública da imagem
       const { data: urlData } = supabase.storage
-        .from('campaign_images')
+        .from('campaign-images')
         .getPublicUrl(filePath);
       
       if (urlData) {
