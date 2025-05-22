@@ -92,7 +92,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/20 pt-8 mt-8 text-center text-white/60">
-          <p>&copy; {new Date().getFullYear()} DoeAqui. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} MIMO. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

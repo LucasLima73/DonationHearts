@@ -131,10 +131,10 @@ export default function Register() {
   return (
     <>
       <Helmet>
-        <title>Cadastre-se | DoeAqui</title>
+        <title>Cadastre-se | MIMO</title>
         <meta 
           name="description" 
-          content="Crie sua conta na plataforma DoeAqui e comece a compartilhar seus sonhos ou ajudar pessoas a realizarem os delas."
+          content="Crie sua conta na plataforma MIMO e comece a compartilhar seus sonhos ou ajudar pessoas a realizarem os delas."
         />
       </Helmet>
       
