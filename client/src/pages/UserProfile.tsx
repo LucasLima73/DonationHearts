@@ -38,19 +38,65 @@ export default function UserProfile() {
     if (!user?.id) return;
     
     try {
-      // 1. Buscar nível do usuário da tabela user_levels
+      console.log('ID do usuário:', user.id);
+      
+      // 1. Buscar doações do usuário
+      const { data: userDonations, error: userDonationsError } = await supabase
+        .from('donations')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      let donations = [];
+      let totalAmount = 0;
+      
+      if (!userDonationsError && userDonations && userDonations.length > 0) {
+        console.log('Doações do usuário encontradas:', userDonations.length);
+        donations = userDonations;
+        totalAmount = userDonations.reduce((sum, donation) => sum + donation.amount, 0);
+      } else {
+        // Verificar campanhas do usuário e suas doações recebidas
+        const { data: userCampaigns, error: campaignsError } = await supabase
+          .from('campaigns')
+          .select('id')
+          .eq('creator_id', user.id);
+        
+        if (!campaignsError && userCampaigns && userCampaigns.length > 0) {
+          console.log('Campanhas do usuário:', userCampaigns.length);
+          const campaignIds = userCampaigns.map(c => c.id);
+          
+          const { data: receivedDonations, error: receivedError } = await supabase
+            .from('donations')
+            .select('*')
+            .in('campaign_id', campaignIds);
+            
+          if (!receivedError && receivedDonations && receivedDonations.length > 0) {
+            console.log('Doações recebidas:', receivedDonations.length);
+            // Adicionar às doações já encontradas
+            donations = [...donations, ...receivedDonations];
+            totalAmount += receivedDonations.reduce((sum, d) => sum + d.amount, 0);
+          }
+        }
+      }
+      
+      // Atualizar contadores de doação
+      console.log('Total de doações:', donations.length);
+      console.log('Valor total em R$:', totalAmount / 100);
+      setDonationCount(donations.length);
+      setTotalDonated(totalAmount / 100);
+      
+      // 2. Calcular pontos e níveis
+      // 50 pontos por doação feita
+      const totalPoints = donations.length * 50;
+      
+      // Buscar ou criar níveis do usuário
       const { data: levelData, error: levelError } = await supabase
         .from('user_levels')
         .select('*')
         .eq('user_id', user.id)
         .single();
-        
-      if (levelError && levelError.code !== 'PGRST116') {
-        console.error('Erro ao buscar nível do usuário:', levelError);
-      }
       
-      // Se encontrou dados do nível do usuário, atualizamos o estado
-      if (levelData) {
+      if (!levelError && levelData) {
+        console.log('Nível existente:', levelData);
         setUserLevel({
           level: levelData.level,
           progress: levelData.progress,
@@ -58,98 +104,46 @@ export default function UserProfile() {
         });
         setUserPoints(levelData.total_points);
       } else {
-        // Se não existe ainda, criar um registro inicial
-        const initialLevel = { level: 1, progress: 0, totalPoints: 0 };
-        setUserLevel(initialLevel);
-        setUserPoints(0);
+        // Calcular nível com base nos pontos
+        const level = calculateLevel(totalPoints);
+        const progress = calculateProgress(totalPoints);
         
-        // Inserir nível inicial no banco de dados
-        const { error: insertError } = await supabase
-          .from('user_levels')
-          .insert({
-            user_id: user.id,
-            level: 1,
-            total_points: 0,
-            progress: 0
-          });
-          
-        if (insertError) {
-          console.error('Erro ao inserir nível inicial do usuário:', insertError);
-        }
-      }
-      
-      // 2. Buscar conquistas do usuário
-      const { data: achievementsData, error: achievementsError } = await supabase
-        .from('user_achievements')
-        .select(`
-          *,
-          achievement:achievement_id(*)
-        `)
-        .eq('user_id', user.id);
+        console.log('Nível calculado:', { level, progress, totalPoints });
+        setUserLevel({ level, progress, totalPoints });
+        setUserPoints(totalPoints);
         
-      if (achievementsError) {
-        console.error('Erro ao buscar conquistas do usuário:', achievementsError);
-      }
-      
-      // Se encontrou conquistas, mapeamos para o formato correto
-      if (achievementsData && achievementsData.length > 0) {
-        const userAchievementsList = achievementsData.map((item) => {
-          const achievement = item.achievement;
-          return {
-            id: achievement.id,
-            name: achievement.name,
-            description: achievement.description,
-            icon: achievement.icon,
-            category: achievement.category,
-            requiredPoints: achievement.required_points,
-            isSecret: achievement.is_secret,
-            createdAt: achievement.created_at
-          };
-        });
-        
-        setUserAchievements(userAchievementsList);
-      } else {
-        // Se não tem conquistas, verificar se precisa desbloquear a primeira
-        if (levelData && levelData.total_points >= 50) {
-          const { data: firstAchievement } = await supabase
-            .from('achievements')
-            .select('*')
-            .eq('name', 'Primeira Doação')
-            .single();
+        // Criar registro inicial
+        try {
+          const { error: insertLevelError } = await supabase
+            .from('user_levels')
+            .insert({
+              user_id: user.id,
+              level,
+              total_points: totalPoints,
+              progress
+            });
             
-          if (firstAchievement) {
-            setUserAchievements([{
-              id: firstAchievement.id,
-              name: firstAchievement.name,
-              description: firstAchievement.description,
-              icon: firstAchievement.icon,
-              category: firstAchievement.category,
-              requiredPoints: firstAchievement.required_points,
-              isSecret: firstAchievement.is_secret,
-              createdAt: firstAchievement.created_at
-            }]);
-          } else {
-            setUserAchievements([]);
+          if (insertLevelError) {
+            console.error('Erro ao inserir nível:', insertLevelError);
           }
-        } else {
-          setUserAchievements([]);
+        } catch (e) {
+          console.error('Erro ao criar nível:', e);
         }
       }
       
-      // 3. Buscar histórico de pontos
-      const { data: historyData, error: historyError } = await supabase
+      // 3. Buscar ou criar histórico de atividades
+      // Primeiro verificar se já existe histórico
+      const { data: existingHistory, error: historyError } = await supabase
         .from('points_history')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
-        
-      if (historyError) {
-        console.error('Erro ao buscar histórico de pontos:', historyError);
-      }
       
-      if (historyData && historyData.length > 0) {
-        const formattedHistory = historyData.map(item => ({
+      if (!historyError && existingHistory && existingHistory.length > 0) {
+        // Usar histórico existente
+        console.log('Histórico encontrado:', existingHistory.length);
+        const formattedHistory = existingHistory.map(item => ({
           id: item.id,
           date: new Date(item.created_at),
           action: item.description,
@@ -158,83 +152,110 @@ export default function UserProfile() {
         }));
         
         setActivityHistory(formattedHistory);
+      } else if (donations.length > 0) {
+        // Criar histórico a partir das doações
+        const activityItems = donations.map((donation, index) => ({
+          id: index + 1,
+          date: new Date(donation.created_at),
+          action: `Doação de R$ ${(donation.amount / 100).toFixed(2)}`,
+          points: 50,
+          category: 'donation'
+        }));
+        
+        console.log('Histórico gerado:', activityItems.length);
+        setActivityHistory(activityItems);
+        
+        // Tentar inserir no banco
+        try {
+          const historyRecords = donations.map(donation => ({
+            user_id: user.id,
+            amount: 50,
+            category: 'donation',
+            description: `Doação de R$ ${(donation.amount / 100).toFixed(2)}`,
+            created_at: donation.created_at
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('points_history')
+            .insert(historyRecords);
+            
+          if (insertError) {
+            console.error('Erro ao inserir histórico:', insertError);
+          }
+        } catch (e) {
+          console.error('Erro ao criar histórico:', e);
+        }
       } else {
-        // Histórico vazio
+        // Sem doações, histórico vazio
         setActivityHistory([]);
       }
       
-      // 4. Buscar contagem e valor total de doações
-      // Na página dashboard está funcionando, então vamos verificar as colunas e adaptar a consulta
-      console.log('ID do usuário:', user.id);
-      
-      // Verificar estrutura da tabela
-      const { data: tableInfo, error: tableInfoError } = await supabase
-        .from('donations')
-        .select('*')
-        .limit(1);
-        
-      if (tableInfoError) {
-        console.error('Erro ao verificar estrutura da tabela donations:', tableInfoError);
-      } else {
-        console.log('Estrutura da tabela donations:', tableInfo);
-      }
-      
-      // Buscar informações das doações usando múltiplas tentativas de campos
-      let donationsList = [];
-      let donationTotal = 0;
-      
-      // Tentativa 1: Com user_id (doador)
-      const { data: userDonations, error: userDonationsError } = await supabase
-        .from('donations')
-        .select('*')
+      // 4. Verificar conquistas
+      const { data: userAchievementsData, error: achievementsError } = await supabase
+        .from('user_achievements')
+        .select('*, achievement:achievement_id(*)')
         .eq('user_id', user.id);
+      
+      if (!achievementsError && userAchievementsData && userAchievementsData.length > 0) {
+        console.log('Conquistas encontradas:', userAchievementsData.length);
+        const achievements = userAchievementsData.map(ua => ({
+          id: ua.achievement.id,
+          name: ua.achievement.name,
+          description: ua.achievement.description,
+          icon: ua.achievement.icon,
+          category: ua.achievement.category,
+          requiredPoints: ua.achievement.required_points,
+          isSecret: ua.achievement.is_secret,
+          createdAt: ua.achievement.created_at
+        }));
         
-      if (!userDonationsError && userDonations && userDonations.length > 0) {
-        console.log('Doações encontradas com user_id:', userDonations);
-        donationsList = userDonations;
-        donationTotal = userDonations.reduce((sum, donation) => sum + donation.amount, 0);
-      } else if (userDonationsError) {
-        console.error('Erro ao buscar doações com user_id:', userDonationsError);
-      }
-      
-      // Se não encontrar com user_id, tenta com outras possibilidades
-      if (donationsList.length === 0) {
-        // Tentativa 2: Buscar campanhas do usuário e depois doações para essas campanhas
-        const { data: userCampaigns, error: campaignsError } = await supabase
-          .from('campaigns')
-          .select('id')
-          .eq('creator_id', user.id);
+        setUserAchievements(achievements);
+      } else if (totalPoints >= 50) {
+        // Verificar se podemos atribuir a primeira conquista
+        const { data: firstAchievement } = await supabase
+          .from('achievements')
+          .select('*')
+          .eq('name', 'Primeira Doação')
+          .single();
           
-        if (!campaignsError && userCampaigns && userCampaigns.length > 0) {
-          console.log('Campanhas do usuário:', userCampaigns);
-          const campaignIds = userCampaigns.map(c => c.id);
+        if (firstAchievement) {
+          console.log('Atribuindo primeira conquista');
+          setUserAchievements([{
+            id: firstAchievement.id,
+            name: firstAchievement.name,
+            description: firstAchievement.description,
+            icon: firstAchievement.icon,
+            category: firstAchievement.category,
+            requiredPoints: firstAchievement.required_points,
+            isSecret: firstAchievement.is_secret,
+            createdAt: firstAchievement.created_at
+          }]);
           
-          const { data: campaignDonations, error: campDonationsError } = await supabase
-            .from('donations')
-            .select('*')
-            .in('campaign_id', campaignIds);
-            
-          if (!campDonationsError && campaignDonations && campaignDonations.length > 0) {
-            console.log('Doações para campanhas do usuário:', campaignDonations);
-            donationsList = campaignDonations;
-            donationTotal = campaignDonations.reduce((sum, donation) => sum + donation.amount, 0);
-          } else if (campDonationsError) {
-            console.error('Erro ao buscar doações para campanhas:', campDonationsError);
+          // Tentar salvar no banco
+          try {
+            const { error: achievementError } = await supabase
+              .from('user_achievements')
+              .insert({
+                user_id: user.id,
+                achievement_id: firstAchievement.id,
+                unlocked_at: new Date().toISOString()
+              });
+              
+            if (achievementError) {
+              console.error('Erro ao salvar conquista:', achievementError);
+            }
+          } catch (e) {
+            console.error('Erro ao atribuir conquista:', e);
           }
-        } else if (campaignsError) {
-          console.error('Erro ao buscar campanhas do usuário:', campaignsError);
+        } else {
+          setUserAchievements([]);
         }
+      } else {
+        setUserAchievements([]);
       }
-      
-      // Atualizar os dados de exibição
-      setDonationCount(donationsList.length);
-      setTotalDonated(donationTotal / 100); // Converter de centavos para reais
-      
-      console.log('Doações encontradas:', donationsList.length);
-      console.log('Valor total:', donationTotal / 100);
       
     } catch (error) {
-      console.error('Erro ao buscar dados de gamificação:', error);
+      console.error('Erro ao buscar dados:', error);
     } finally {
       setIsLoading(false);
     }
