@@ -6,6 +6,7 @@ import { AchievementGrid } from '@/components/gamification/AchievementGrid';
 import { UserLevel } from '@/components/gamification/UserLevel';
 import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
 import { predefinedAchievements, AchievementCategory, type PointHistory } from '@shared/achievements';
+import { createGamificationTables } from '@/migrations/createGameTables';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
@@ -35,26 +36,57 @@ export default function UserProfile() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Busca dados do usuário do banco de dados
+  // Função para lidar com os casos em que as tabelas não existem
+  async function handleGamificationData() {
+    // Ajusta os valores para manter a interface funcionando mesmo sem as tabelas
+    setUserLevel({ level: 1, progress: 0, totalPoints: 0 });
+    setUserPoints(0);
+    setDonationCount(0);
+    setTotalDonated(0);
+    setUserAchievements([]);
+    setActivityHistory([]);
+  }
+  
+  // Efeito para garantir que o usuário tenha dados de gamificação
   useEffect(() => {
     if (!user?.id) return;
     
     async function fetchUserData() {
       setIsLoading(true);
       try {
+        // Tentar carregar os dados do usuário
+        // Se ocorrer um erro relacionado a tabelas ausentes, usar handleGamificationData
+        
+        try {
+          // Tentar criar as tabelas necessárias primeiro
+          const tablesCreated = await createGamificationTables();
+          console.log('Tabelas criadas com sucesso?', tablesCreated);
+        } catch (createError) {
+          console.error('Erro ao criar tabelas:', createError);
+        }
+        
         // 1. Buscar nível do usuário
         const { data: levelData, error: levelError } = await supabase
           .from('user_levels')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', user?.id || '')
           .single();
           
-        if (levelError && levelError.code !== 'PGRST116') {
+        if (levelError) {
           console.error('Erro ao buscar nível do usuário:', levelError);
-          toast({
-            title: "Erro ao carregar dados",
-            description: "Não foi possível carregar o nível do usuário",
-            variant: "destructive"
-          });
+          
+          if (levelError.code === '42P01' || levelError.message?.includes('does not exist')) {
+            // Tabela não existe, configurar dados padrão
+            await handleGamificationData();
+            setIsLoading(false);
+            return; // Interromper a execução para não continuar com outras consultas
+          } else if (levelError.code !== 'PGRST116') {
+            toast({
+              title: "Erro ao carregar dados",
+              description: "Não foi possível carregar o nível do usuário",
+              variant: "destructive"
+            });
+          }
         }
         
         // Se o usuário não tem nível registrado, cria um nível inicial
