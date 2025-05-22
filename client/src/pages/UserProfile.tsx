@@ -165,16 +165,45 @@ export default function UserProfile() {
       }
       
       // 4. Buscar contagem e valor total de doações
+      // Verificar primeiro quais são as colunas da tabela donations
+      const { data: tableInfo, error: tableInfoError } = await supabase
+        .from('donations')
+        .select('*')
+        .limit(1);
+        
+      if (tableInfoError) {
+        console.error('Erro ao verificar estrutura da tabela donations:', tableInfoError);
+      } else {
+        console.log('Estrutura da tabela donations:', tableInfo);
+      }
+        
+      // Usamos user_id em vez de donor_id, que parece ser o nome correto da coluna
       const { data: donationsData, error: donationsError } = await supabase
         .from('donations')
         .select('amount')
-        .eq('donor_id', user.id);
+        .eq('user_id', user.id);
         
       if (donationsError) {
         console.error('Erro ao buscar doações:', donationsError);
-      }
-      
-      if (donationsData && donationsData.length > 0) {
+        // Tentar com outro possível nome de coluna
+        const { data: donationsAlt, error: donationsAltError } = await supabase
+          .from('donations')
+          .select('amount')
+          .eq('creator_id', user.id);
+          
+        if (donationsAltError) {
+          console.error('Erro ao buscar doações (alt):', donationsAltError);
+          setDonationCount(0);
+          setTotalDonated(0);
+        } else if (donationsAlt && donationsAlt.length > 0) {
+          const total = donationsAlt.reduce((sum, donation) => sum + (donation.amount || 0), 0);
+          setDonationCount(donationsAlt.length);
+          setTotalDonated(total / 100); // Converter de centavos para reais
+        } else {
+          setDonationCount(0);
+          setTotalDonated(0);
+        }
+      } else if (donationsData && donationsData.length > 0) {
         const total = donationsData.reduce((sum, donation) => sum + (donation.amount || 0), 0);
         setDonationCount(donationsData.length);
         setTotalDonated(total / 100); // Converter de centavos para reais
