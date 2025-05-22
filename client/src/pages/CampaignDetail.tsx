@@ -242,8 +242,8 @@ export default function CampaignDetail() {
       const { error: updateError } = await supabase
         .from('campaigns')
         .update({ 
-          raised: (campaign.raised || 0) + donationAmount,
-          updated_at: new Date().toISOString()
+          raised: (campaign.raised || 0) + donationAmount
+          // Removemos o campo updated_at que não existe na tabela campaigns
         })
         .eq('id', campaign.id);
       
