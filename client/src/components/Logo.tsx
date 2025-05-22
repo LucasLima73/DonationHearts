@@ -22,7 +22,7 @@ export default function Logo({ dark = false }: LogoProps) {
           <Sparkles className="text-white h-5 w-5" />
         </motion.div>
         <span className="font-heading font-bold text-xl tracking-tight text-gradient">
-          DoeAqui
+          MIMO
         </span>
       </div>
     </Link>

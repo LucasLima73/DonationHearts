@@ -10,10 +10,10 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>Entrar | DoeAqui</title>
+        <title>Entrar | MIMO</title>
         <meta 
           name="description" 
-          content="Faça login na plataforma DoeAqui e continue a sua jornada de solidariedade."
+          content="Faça login na plataforma MIMO e continue a sua jornada de solidariedade."
         />
       </Helmet>
       
