@@ -164,7 +164,10 @@ export default function UserProfile() {
       }
       
       // 4. Buscar contagem e valor total de doações
-      // Verificar primeiro quais são as colunas da tabela donations
+      // Na página dashboard está funcionando, então vamos verificar as colunas e adaptar a consulta
+      console.log('ID do usuário:', user.id);
+      
+      // Verificar estrutura da tabela
       const { data: tableInfo, error: tableInfoError } = await supabase
         .from('donations')
         .select('*')
@@ -175,41 +178,60 @@ export default function UserProfile() {
       } else {
         console.log('Estrutura da tabela donations:', tableInfo);
       }
-        
-      // Usamos user_id em vez de donor_id, que parece ser o nome correto da coluna
-      const { data: donationsData, error: donationsError } = await supabase
+      
+      // Buscar informações das doações usando múltiplas tentativas de campos
+      let donationsList = [];
+      let donationTotal = 0;
+      
+      // Tentativa 1: Com user_id (doador)
+      const { data: userDonations, error: userDonationsError } = await supabase
         .from('donations')
-        .select('amount')
+        .select('*')
         .eq('user_id', user.id);
         
-      if (donationsError) {
-        console.error('Erro ao buscar doações:', donationsError);
-        // Tentar com outro possível nome de coluna
-        const { data: donationsAlt, error: donationsAltError } = await supabase
-          .from('donations')
-          .select('amount')
+      if (!userDonationsError && userDonations && userDonations.length > 0) {
+        console.log('Doações encontradas com user_id:', userDonations);
+        donationsList = userDonations;
+        donationTotal = userDonations.reduce((sum, donation) => sum + donation.amount, 0);
+      } else if (userDonationsError) {
+        console.error('Erro ao buscar doações com user_id:', userDonationsError);
+      }
+      
+      // Se não encontrar com user_id, tenta com outras possibilidades
+      if (donationsList.length === 0) {
+        // Tentativa 2: Buscar campanhas do usuário e depois doações para essas campanhas
+        const { data: userCampaigns, error: campaignsError } = await supabase
+          .from('campaigns')
+          .select('id')
           .eq('creator_id', user.id);
           
-        if (donationsAltError) {
-          console.error('Erro ao buscar doações (alt):', donationsAltError);
-          setDonationCount(0);
-          setTotalDonated(0);
-        } else if (donationsAlt && donationsAlt.length > 0) {
-          const total = donationsAlt.reduce((sum, donation) => sum + (donation.amount || 0), 0);
-          setDonationCount(donationsAlt.length);
-          setTotalDonated(total / 100); // Converter de centavos para reais
-        } else {
-          setDonationCount(0);
-          setTotalDonated(0);
+        if (!campaignsError && userCampaigns && userCampaigns.length > 0) {
+          console.log('Campanhas do usuário:', userCampaigns);
+          const campaignIds = userCampaigns.map(c => c.id);
+          
+          const { data: campaignDonations, error: campDonationsError } = await supabase
+            .from('donations')
+            .select('*')
+            .in('campaign_id', campaignIds);
+            
+          if (!campDonationsError && campaignDonations && campaignDonations.length > 0) {
+            console.log('Doações para campanhas do usuário:', campaignDonations);
+            donationsList = campaignDonations;
+            donationTotal = campaignDonations.reduce((sum, donation) => sum + donation.amount, 0);
+          } else if (campDonationsError) {
+            console.error('Erro ao buscar doações para campanhas:', campDonationsError);
+          }
+        } else if (campaignsError) {
+          console.error('Erro ao buscar campanhas do usuário:', campaignsError);
         }
-      } else if (donationsData && donationsData.length > 0) {
-        const total = donationsData.reduce((sum, donation) => sum + (donation.amount || 0), 0);
-        setDonationCount(donationsData.length);
-        setTotalDonated(total / 100); // Converter de centavos para reais
-      } else {
-        setDonationCount(0);
-        setTotalDonated(0);
       }
+      
+      // Atualizar os dados de exibição
+      setDonationCount(donationsList.length);
+      setTotalDonated(donationTotal / 100); // Converter de centavos para reais
+      
+      console.log('Doações encontradas:', donationsList.length);
+      console.log('Valor total:', donationTotal / 100);
       
     } catch (error) {
       console.error('Erro ao buscar dados de gamificação:', error);
