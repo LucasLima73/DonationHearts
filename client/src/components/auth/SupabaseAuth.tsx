@@ -81,7 +81,7 @@ export default function SupabaseAuth({
               <p className="text-sm text-gray-400">
                 {authView === 'sign_in' 
                   ? 'Faça login para continuar sua jornada de solidariedade' 
-                  : 'Junte-se à comunidade DoeAqui e comece a fazer a diferença'}
+                  : 'Junte-se à comunidade MIMO e comece a fazer a diferença'}
               </p>
             </div>
             

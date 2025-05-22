@@ -18,7 +18,7 @@ import confetti from 'canvas-confetti';
 const tourSteps = [
   {
     id: 'welcome',
-    title: 'Bem-vindo(a) ao DoeAqui!',
+    title: 'Bem-vindo(a) ao MIMO!',
     description: 'Estamos felizes em tê-lo(a) conosco! Vamos fazer um rápido tour para você conhecer todas as funcionalidades da plataforma.',
     targetId: null,
     position: 'center',
@@ -82,7 +82,7 @@ const tourSteps = [
   {
     id: 'complete',
     title: 'Tudo Pronto!',
-    description: 'Agora você já conhece as principais funcionalidades do DoeAqui. Vamos começar a fazer a diferença juntos!',
+    description: 'Agora você já conhece as principais funcionalidades do MIMO. Vamos começar a fazer a diferença juntos!',
     targetId: null,
     position: 'center',
     icon: Heart,

@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loadUser();
           toast({
             title: "Login bem-sucedido!",
-            description: "Bem-vindo(a) ao DoeAqui.",
+            description: "Bem-vindo(a) ao MIMO.",
           });
         } else if (event === "SIGNED_OUT") {
           setUser(null);
