@@ -5,9 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AchievementGrid } from '@/components/gamification/AchievementGrid';
 import { UserLevel } from '@/components/gamification/UserLevel';
 import { AchievementUnlock } from '@/components/gamification/AchievementUnlock';
-import { predefinedAchievements, AchievementCategory } from '@shared/achievements';
+import { predefinedAchievements, AchievementCategory, type PointHistory } from '@shared/achievements';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Trophy,
   History,

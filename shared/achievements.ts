@@ -43,6 +43,16 @@ export const pointsHistory = pgTable('points_history', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Níveis de usuário
+export const userLevels = pgTable('user_levels', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  level: integer('level').notNull().default(1),
+  totalPoints: integer('total_points').notNull().default(0),
+  progress: integer('progress').notNull().default(0), // Progresso para o próximo nível (0-100)
+  lastUpdated: timestamp('last_updated').defaultNow(),
+});
+
 // Categorias de pontos de atividade
 export enum PointCategory {
   DONATION = 'donation',
@@ -67,18 +77,21 @@ export type Achievement = typeof achievements.$inferSelect;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type UserActivityPoint = typeof userActivityPoints.$inferSelect;
 export type PointHistory = typeof pointsHistory.$inferSelect;
+export type UserLevel = typeof userLevels.$inferSelect;
 
 // Schemas de inserção
 export const insertAchievementSchema = createInsertSchema(achievements);
 export const insertUserAchievementSchema = createInsertSchema(userAchievements);
 export const insertUserActivityPointSchema = createInsertSchema(userActivityPoints);
 export const insertPointHistorySchema = createInsertSchema(pointsHistory);
+export const insertUserLevelSchema = createInsertSchema(userLevels);
 
 // Tipos de inserção
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type InsertUserActivityPoint = z.infer<typeof insertUserActivityPointSchema>;
 export type InsertPointHistory = z.infer<typeof insertPointHistorySchema>;
+export type InsertUserLevel = z.infer<typeof insertUserLevelSchema>;
 
 // Lista de conquistas predefinidas
 export const predefinedAchievements: InsertAchievement[] = [
