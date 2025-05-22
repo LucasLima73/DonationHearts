@@ -31,7 +31,9 @@ export const donations = pgTable('donations', {
   user_id: uuid('user_id').notNull(),
   message: text('message'),
   anonymous: boolean('anonymous').default(false),
-  created_at: timestamp('created_at').defaultNow()
+  created_at: timestamp('created_at').defaultNow(),
+  payment_intent_id: text('payment_intent_id'),
+  payment_status: text('payment_status').default('succeeded')
 });
 
 // Schemas para validação usando zod
