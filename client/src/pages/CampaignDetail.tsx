@@ -34,6 +34,7 @@ import { StripeProvider } from '@/components/payment/StripeProvider';
 import { StripeCheckout } from '@/components/payment/StripeCheckout';
 import { apiRequest } from '@/lib/queryClient';
 import { QuickDonationPanel } from '@/components/donation/QuickDonationPanel';
+import { FloatingDonationButton } from '@/components/donation/FloatingDonationButton';
 
 export default function CampaignDetail() {
   const { id } = useParams();
@@ -354,6 +355,9 @@ export default function CampaignDetail() {
           content={campaign.description.substring(0, 160)}
         />
       </Helmet>
+      
+      {/* Botão flutuante de micro-doação */}
+      <FloatingDonationButton campaignId={campaign.id} />
       
       <div className="min-h-screen grid-background pt-20 w-full">
         {/* Efeitos de background */}
