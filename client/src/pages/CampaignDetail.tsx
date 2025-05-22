@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import { convertImageUrl } from '@/utils/imageUrlConverter';
 import { 
   ArrowLeft, 
   Share, 
@@ -391,7 +392,7 @@ export default function CampaignDetail() {
                 {/* Imagem principal */}
                 <div className="rounded-xl overflow-hidden mb-6 glass-card p-2 border border-white/5">
                   <img 
-                    src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
+                    src={convertImageUrl(campaign.image_url) || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                     alt={campaign.title}
                     className="w-full h-[300px] md:h-[450px] object-cover rounded-lg"
                     onError={(e) => {

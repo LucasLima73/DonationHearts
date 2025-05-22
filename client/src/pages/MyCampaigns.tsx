@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
+import { convertImageUrl } from '@/utils/imageUrlConverter';
 import { useToast } from '@/hooks/use-toast';
 import { Campaign } from '@shared/campaigns';
 import { 
@@ -261,7 +262,7 @@ export default function MyCampaigns() {
                       >
                         <div className="relative h-48">
                           <img 
-                            src={campaign.image_url || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
+                            src={convertImageUrl(campaign.image_url) || 'https://placehold.co/800x450/2a2a2a/ffffff?text=Sem+Imagem'} 
                             alt={campaign.title}
                             className="w-full h-full object-cover"
                             onError={(e) => {
