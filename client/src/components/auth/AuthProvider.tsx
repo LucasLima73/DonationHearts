@@ -22,20 +22,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load user on initial load
     loadUser();
 
-    // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_IN" && session) {
           loadUser();
-          toast({
-            title: "Login bem-sucedido!",
-            description: "Bem-vindo(a) ao MIMO.",
-          });
+
+          // Verifica se o toast já foi exibido
+          const toastShown = localStorage.getItem("mimo-welcome-toast-shown");
+          if (!toastShown) {
+            toast({
+              title: "Login bem-sucedido!",
+              description: "Bem-vindo(a) ao MIMO.",
+            });
+
+            // Marca como exibido
+            localStorage.setItem("mimo-welcome-toast-shown", "true");
+          }
+
         } else if (event === "SIGNED_OUT") {
           setUser(null);
+          localStorage.removeItem("mimo-welcome-toast-shown"); // Limpa ao sair
         }
       }
     );
@@ -59,17 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function handleSignOut() {
     try {
-      const currentUserId = user?.id;
-      
       await supabase.auth.signOut();
       setUser(null);
-      
-      // Limpar dados específicos do usuário do localStorage quando fizer logout
-      if (currentUserId) {
-        localStorage.removeItem('doeaqui-onboarding-completed');
-        localStorage.removeItem('doeaqui-onboarding-dismissed');
-      }
-      
+      localStorage.removeItem("mimo-welcome-toast-shown");
+
       toast({
         title: "Logout realizado",
         description: "Você saiu da sua conta com sucesso.",
