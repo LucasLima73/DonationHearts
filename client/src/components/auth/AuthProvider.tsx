@@ -59,8 +59,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function handleSignOut() {
     try {
+      const currentUserId = user?.id;
+      
       await supabase.auth.signOut();
       setUser(null);
+      
+      // Limpar dados específicos do usuário do localStorage quando fizer logout
+      if (currentUserId) {
+        const welcomeShownKey = `doeaqui-welcome-shown-${currentUserId}`;
+        localStorage.removeItem(welcomeShownKey);
+      }
+      
       toast({
         title: "Logout realizado",
         description: "Você saiu da sua conta com sucesso.",
