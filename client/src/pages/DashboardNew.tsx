@@ -73,19 +73,13 @@ export default function Dashboard() {
       const welcomeKey = `doeaqui-user-welcomed-${user.id}`;
       const hasBeenWelcomed = localStorage.getItem(welcomeKey);
       
-      console.log("Verificando boas-vindas:", {
-        userId: user.id,
-        welcomeKey,
-        hasBeenWelcomed,
-        isFirstVisit: hasBeenWelcomed === null
-      });
-      
       if (hasBeenWelcomed === null) {
-        console.log("Primeira visita - mostrando boas-vindas");
         setIsFirstTimeUser(true);
         setShowWelcomeMessage(true);
+        // Marcar que o usuário já foi recebido
+        localStorage.setItem(welcomeKey, 'true');
       } else {
-        console.log("Usuário já foi recebido - não mostrando boas-vindas");
+        setIsFirstTimeUser(false);
         setShowWelcomeMessage(false);
       }
     }
@@ -292,13 +286,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex justify-end">
                         <Button 
-                          onClick={() => {
-                            setShowWelcomeMessage(false);
-                            // Garantir que a mensagem não apareça novamente durante esta sessão
-                            if (user?.id) {
-                              localStorage.setItem(`doeaqui-user-welcomed-${user.id}`, 'true');
-                            }
-                          }}
+                          onClick={() => setShowWelcomeMessage(false)}
                           className="bg-gradient-to-r from-primary to-secondary hover:brightness-110 text-white"
                         >
                           Entendi, vamos começar!
