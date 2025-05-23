@@ -69,20 +69,27 @@ export default function Dashboard() {
   
   // Verificar se é a primeira vez do usuário e mostrar mensagem de boas-vindas
   useEffect(() => {
-    if (!isLoading && user) {
-      // Verificar se é a primeira visita do usuário
-      const isFirstVisit = localStorage.getItem(`doeaqui-user-welcomed-${user.id}`) === null;
+    if (!isLoading && user?.id) {
+      const welcomeKey = `doeaqui-user-welcomed-${user.id}`;
+      const hasBeenWelcomed = localStorage.getItem(welcomeKey);
       
-      if (isFirstVisit) {
-        console.log("Primeira visita do usuário:", user.name || user.email);
+      console.log("Verificando boas-vindas:", {
+        userId: user.id,
+        welcomeKey,
+        hasBeenWelcomed,
+        isFirstVisit: hasBeenWelcomed === null
+      });
+      
+      if (hasBeenWelcomed === null) {
+        console.log("Primeira visita - mostrando boas-vindas");
         setIsFirstTimeUser(true);
         setShowWelcomeMessage(true);
-        
-        // Marcar que o usuário já recebeu as boas-vindas
-        localStorage.setItem(`doeaqui-user-welcomed-${user.id}`, 'true');
+      } else {
+        console.log("Usuário já foi recebido - não mostrando boas-vindas");
+        setShowWelcomeMessage(false);
       }
     }
-  }, [user, isLoading]);
+  }, [user?.id, isLoading]);
   
   // Carregar dados reais de doações
   useEffect(() => {
@@ -285,7 +292,13 @@ export default function Dashboard() {
                       </div>
                       <div className="flex justify-end">
                         <Button 
-                          onClick={() => setShowWelcomeMessage(false)}
+                          onClick={() => {
+                            setShowWelcomeMessage(false);
+                            // Garantir que a mensagem não apareça novamente durante esta sessão
+                            if (user?.id) {
+                              localStorage.setItem(`doeaqui-user-welcomed-${user.id}`, 'true');
+                            }
+                          }}
                           className="bg-gradient-to-r from-primary to-secondary hover:brightness-110 text-white"
                         >
                           Entendi, vamos começar!
