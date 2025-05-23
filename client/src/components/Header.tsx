@@ -68,9 +68,6 @@ export default function Header() {
             <Link href="/">
               <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Início</div>
             </Link>
-            <Link href="#explore">
-              <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Explorar</div>
-            </Link>
             <Link href="#how-it-works">
               <div className="font-heading text-foreground hover:text-primary transition-colors duration-200 font-medium">Como Funciona</div>
             </Link>
@@ -86,14 +83,16 @@ export default function Header() {
               </>
             ) : null}
             
-            <Button 
-              asChild 
-              className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow neon-border"
-            >
-              <Link href="#request">
-                <div>Faça seu Pedido</div>
-              </Link>
-            </Button>
+            {user && (
+              <Button 
+                asChild 
+                className="bg-primary hover:bg-primary/90 text-white font-heading rounded-md btn-glow neon-border"
+              >
+                <Link href="/dashboard">
+                  <div>Dashboard</div>
+                </Link>
+              </Button>
+            )}
             
             <Button
               variant="ghost"

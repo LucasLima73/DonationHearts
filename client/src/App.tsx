@@ -5,15 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
-import DetailPage from "@/pages/DetailPage";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import UserProfile from "@/pages/UserProfile";
 import Dashboard from "@/pages/DashboardNew";
 import NewCampaign from "@/pages/NewCampaign";
-import CampaignDetail from "@/pages/CampaignDetail";
 import MyCampaigns from "@/pages/MyCampaigns";
-import AllCampaigns from "@/pages/AllCampaigns";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -54,68 +51,40 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function Router() {
   return (
     <Switch>
-      <Route path="/">
-        {() => (
-          <PublicRoute>
-            <Home />
-          </PublicRoute>
-        )}
-      </Route>
-      <Route path="/detalhes/:id" component={DetailPage} />
-      <Route path="/register">
-        {() => (
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        )}
-      </Route>
+      {/* Rotas públicas */}
+      <Route path="/" component={Home} />
+      <Route path="/register" component={Register} />
       <Route path="/login">
-        {() => (
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        )}
+        <PublicRoute>
+          <Login />
+        </PublicRoute>
       </Route>
+      
+      {/* Rotas protegidas - apenas para criadores */}
       <Route path="/dashboard">
-        {() => (
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        )}
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
       </Route>
-      <Route path="/perfil">
-        {() => (
-          <ProtectedRoute>
-            <UserProfile />
-          </ProtectedRoute>
-        )}
+      
+      <Route path="/profile">
+        <ProtectedRoute>
+          <UserProfile />
+        </ProtectedRoute>
       </Route>
-      <Route path="/nova-campanha">
-        {() => (
-          <ProtectedRoute>
-            <NewCampaign />
-          </ProtectedRoute>
-        )}
+      
+      <Route path="/campaigns/new">
+        <ProtectedRoute>
+          <NewCampaign />
+        </ProtectedRoute>
       </Route>
-      <Route path="/todas-campanhas">
-        {() => (
-          <ProtectedRoute>
-            <AllCampaigns />
-          </ProtectedRoute>
-        )}
+      
+      <Route path="/campaigns/my">
+        <ProtectedRoute>
+          <MyCampaigns />
+        </ProtectedRoute>
       </Route>
-      <Route path="/minhas-campanhas">
-        {() => (
-          <ProtectedRoute>
-            <MyCampaigns />
-          </ProtectedRoute>
-        )}
-      </Route>
-      <Route path="/campanhas/:id">
-        {() => (
-          <CampaignDetail />
-        )}
-      </Route>
+      
       <Route component={NotFound} />
     </Switch>
   );
