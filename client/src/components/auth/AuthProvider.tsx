@@ -66,9 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Limpar dados específicos do usuário do localStorage quando fizer logout
       if (currentUserId) {
-        const welcomeShownKey = `doeaqui-user-welcomed-${currentUserId}`;
-        localStorage.removeItem(welcomeShownKey);
-        // Também limpar outros dados relacionados ao usuário
         localStorage.removeItem('doeaqui-onboarding-completed');
         localStorage.removeItem('doeaqui-onboarding-dismissed');
       }

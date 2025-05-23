@@ -39,9 +39,7 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hideDonationValues, setHideDonationValues] = useState(false);
   const [hideCampaignValues, setHideCampaignValues] = useState(false);
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
-  const [welcomeChecked, setWelcomeChecked] = useState(false);
   
   // Estados para armazenar os dados reais
   const [userPoints, setUserPoints] = useState(0);
@@ -68,24 +66,20 @@ export default function Dashboard() {
     setHideCampaignValues(!hideCampaignValues);
   };
   
-  // Verificar se é a primeira vez do usuário e mostrar mensagem de boas-vindas
+  // Verificar se é a primeira vez do usuário
   useEffect(() => {
-    if (!isLoading && user?.id && !welcomeChecked) {
+    if (!isLoading && user?.id) {
       const welcomeKey = `doeaqui-user-welcomed-${user.id}`;
       const hasBeenWelcomed = localStorage.getItem(welcomeKey);
       
       if (hasBeenWelcomed === null || hasBeenWelcomed !== 'true') {
         setIsFirstTimeUser(true);
-        setShowWelcomeMessage(true);
-        // Marcar imediatamente que o usuário já foi recebido
         localStorage.setItem(welcomeKey, 'true');
       } else {
         setIsFirstTimeUser(false);
-        setShowWelcomeMessage(false);
       }
-      setWelcomeChecked(true);
     }
-  }, [user?.id, isLoading, welcomeChecked]);
+  }, [user?.id, isLoading]);
   
   // Carregar dados reais de doações
   useEffect(() => {
@@ -246,59 +240,7 @@ export default function Dashboard() {
         <div className="lg:pl-64 transition-all duration-300">
           <div className="container mx-auto w-full max-w-[1200px] px-4 py-8">
             
-            {/* Mensagem de boas-vindas personalizada para primeira visita */}
-            {welcomeChecked && showWelcomeMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-                className="mb-8 glass-card border border-primary/20 rounded-xl p-6 relative overflow-hidden"
-              >
-                {/* Fundo decorativo */}
-                <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-gradient-to-br from-primary/20 to-secondary/10 blur-xl"></div>
-                
-                <div className="relative z-10">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/30 text-white p-3 rounded-lg">
-                      <Award className="w-8 h-8" />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h2 className="text-xl md:text-2xl font-bold text-white mb-1">
-                        Bem-vindo(a) ao DoeAqui, {user?.name || 'amigo(a)'}!
-                      </h2>
-                      <p className="text-gray-300 mb-3">
-                        É com grande alegria que recebemos você em nossa plataforma. Sua jornada de solidariedade começa agora!
-                      </p>
-                      <div className="text-sm text-gray-300 mb-4">
-                        <ul className="space-y-1">
-                          <li className="flex items-center">
-                            <ChevronRight className="w-4 h-4 text-primary mr-1" />
-                            Crie sua primeira campanha ou faça uma doação
-                          </li>
-                          <li className="flex items-center">
-                            <ChevronRight className="w-4 h-4 text-primary mr-1" />
-                            Acompanhe o impacto das suas ações
-                          </li>
-                          <li className="flex items-center">
-                            <ChevronRight className="w-4 h-4 text-primary mr-1" />
-                            Ganhe conquistas e suba de nível
-                          </li>
-                        </ul>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button 
-                          onClick={() => setShowWelcomeMessage(false)}
-                          className="bg-gradient-to-r from-primary to-secondary hover:brightness-110 text-white"
-                        >
-                          Entendi, vamos começar!
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+
 
             {/* Cabeçalho de boas-vindas padrão */}
             <motion.div
