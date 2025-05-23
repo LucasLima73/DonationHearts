@@ -22,7 +22,7 @@ interface RecentCampaignsProps {
 
 export function RecentCampaigns({ className }: RecentCampaignsProps) {
   const { user } = useAuth();
-  const [campaigns, setCampaigns] = useState([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Dados simulados para demonstração
