@@ -27,47 +27,22 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
 
   const menuItems = [
     { 
-      title: 'Principal', 
+      title: 'Dashboard', 
       icon: LayoutGrid, 
       href: '/dashboard',
       active: location === '/dashboard'
     },
     { 
-      title: 'Todas Campanhas', 
-      icon: Users, 
-      href: '/todas-campanhas',
-      active: location === '/todas-campanhas'
-    },
-    { 
       title: 'Minhas Campanhas', 
       icon: Heart, 
-      href: '/minhas-campanhas',
-      active: location === '/minhas-campanhas' || (location.includes('/campanhas/') && !location.includes('/todas-campanhas'))
+      href: '/campaigns/my',
+      active: location === '/campaigns/my'
     },
     { 
-      title: 'Conquistas', 
+      title: 'Perfil & Conquistas', 
       icon: Trophy, 
-      href: '/perfil',
-      active: location === '/perfil'
-    },
-    { 
-      title: 'Histórico', 
-      icon: History, 
-      href: '/dashboard/historico',
-      active: location === '/dashboard/historico'
-    },
-    { 
-      title: 'Mensagens', 
-      icon: MessageSquare, 
-      href: '/dashboard/mensagens',
-      active: location === '/dashboard/mensagens',
-      badge: 3
-    },
-    { 
-      title: 'Comunidade', 
-      icon: Users, 
-      href: '/dashboard/comunidade',
-      active: location === '/dashboard/comunidade'
+      href: '/profile',
+      active: location === '/profile'
     },
     { 
       title: 'Configurações', 

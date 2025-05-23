@@ -15,21 +15,21 @@ export default function HeroSection() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="font-bold text-4xl md:text-5xl lg:text-6xl leading-tight mb-4">
-              Faça seus sonhos <br />
-              <span className="text-gradient">virarem realidade</span>
+              Crie e gerencie suas <br />
+              <span className="text-gradient">campanhas</span> facilmente
             </h1>
             <p className="text-lg md:text-xl text-gray-300 mb-8">
-              Conecte-se, compartilhe desejos e veja a magia acontecer. Sem barreiras, apenas possibilidades.
+              A plataforma definitiva para criadores de conteúdo gerenciarem suas campanhas de arrecadação. Profissional, intuitiva e completa.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Button 
                 asChild 
-                className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
+                className="bg-primary hover:bg-primary/90 text-white font-heading rounded-md btn-glow"
                 size="lg"
               >
-                <Link href="#request">
+                <Link href="/register">
                   <div className="flex items-center">
-                    Faça seu Pedido
+                    Comece a Criar
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </div>
                 </Link>
@@ -37,11 +37,11 @@ export default function HeroSection() {
               <Button 
                 asChild 
                 variant="outline" 
-                className="border-primary text-primary hover:bg-primary/20 font-heading rounded-md"
+                className="border-white/20 bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 font-heading rounded-md"
                 size="lg"
               >
-                <Link href="#help">
-                  <div>Quero Ajudar</div>
+                <Link href="#how-it-works">
+                  <div>Como Funciona</div>
                 </Link>
               </Button>
             </div>

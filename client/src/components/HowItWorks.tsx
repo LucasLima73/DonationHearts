@@ -2,26 +2,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Camera, Sparkles, Rocket } from "lucide-react";
+import { Link } from "wouter";
 
 const steps = [
   {
     id: 1,
-    title: "Compartilhe seu desejo",
-    description: "Crie seu perfil, adicione fotos e conte sua história de forma autêntica e transparente.",
+    title: "Crie sua campanha",
+    description: "Monte sua campanha com fotos, descrição e meta. Nossa interface intuitiva torna o processo simples e rápido.",
     icon: Camera,
     color: "from-primary to-accent"
   },
   {
     id: 2,
-    title: "Conecte-se com apoiadores",
-    description: "Nossa comunidade é formada por pessoas que acreditam em sonhos e querem ajudar a realizá-los.",
+    title: "Gerencie tudo em um só lugar",
+    description: "Acompanhe doações, analise métricas e mantenha controle total das suas campanhas no dashboard completo.",
     icon: Sparkles,
     color: "from-secondary to-primary"
   },
   {
     id: 3,
-    title: "Torne-se realidade",
-    description: "Receba o valor arrecadado, realize seu sonho e compartilhe sua jornada com a comunidade.",
+    title: "Alcance seus objetivos",
+    description: "Use nossas ferramentas de análise e gamificação para otimizar suas campanhas e atingir suas metas.",
     icon: Rocket,
     color: "from-accent to-secondary"
   }
@@ -48,7 +49,7 @@ export default function HowItWorks() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Três passos simples para transformar seus sonhos em realidade com o MIMO
+            Três passos simples para gerenciar suas campanhas como um profissional
           </motion.p>
         </div>
 
@@ -89,10 +90,10 @@ export default function HowItWorks() {
         >
           <Button 
             asChild
-            className="bg-secondary hover:bg-secondary/90 text-white font-heading rounded-md btn-glow"
+            className="bg-primary hover:bg-primary/90 text-white font-heading rounded-md btn-glow"
             size="lg"
           >
-            <div>Comece agora mesmo</div>
+            <Link href="/register">Crie sua conta grátis</Link>
           </Button>
         </motion.div>
       </div>
