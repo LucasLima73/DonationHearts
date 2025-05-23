@@ -52,8 +52,16 @@ function Router() {
   return (
     <Switch>
       {/* Rotas públicas */}
-      <Route path="/" component={Home} />
-      <Route path="/register" component={Register} />
+      <Route path="/">
+        <PublicRoute>
+          <Home />
+        </PublicRoute>
+      </Route>
+      <Route path="/register">
+        <PublicRoute>
+          <Register />
+        </PublicRoute>
+      </Route>
       <Route path="/login">
         <PublicRoute>
           <Login />

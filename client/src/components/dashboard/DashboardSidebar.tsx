@@ -13,7 +13,8 @@ import {
   Home,
   History,
   PlusCircle,
-  Mail
+  Mail,
+  LogOut
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -23,7 +24,7 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarProps) {
   const [location, setLocation] = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const menuItems = [
     { 
