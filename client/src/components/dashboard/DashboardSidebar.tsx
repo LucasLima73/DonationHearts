@@ -8,12 +8,7 @@ import {
   Heart,
   Trophy,
   Settings,
-  Users,
-  MessageSquare,
-  Home,
-  History,
   PlusCircle,
-  Mail,
   LogOut
 } from 'lucide-react';
 
@@ -125,11 +120,6 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
                   <div className="flex items-center w-full">
                     <item.icon className={cn("h-5 w-5 mr-3", item.active ? "text-primary" : "text-gray-400")} />
                     <span>{item.title}</span>
-                    {item.badge && (
-                      <span className="ml-auto bg-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] text-white">
-                        {item.badge}
-                      </span>
-                    )}
                   </div>
                 </Button>
               ))}
@@ -141,7 +131,7 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
               variant="default"
               size="sm"
               className="w-full justify-start bg-primary hover:bg-primary/90 btn-glow"
-              onClick={() => setLocation('/nova-campanha')}
+              onClick={() => setLocation('/campaigns/new')}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Nova Campanha
@@ -150,11 +140,11 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start mt-3 border-white/10 hover:bg-white/5"
-              onClick={() => setLocation('/')}
+              className="w-full justify-start mt-3 border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              onClick={signOut}
             >
-              <Home className="h-4 w-4 mr-2" />
-              Voltar para o site
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
             </Button>
           </div>
         </div>
@@ -202,11 +192,6 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
                   <div className="flex items-center w-full">
                     <item.icon className={cn("h-5 w-5 mr-3", item.active ? "text-primary" : "text-gray-400")} />
                     <span>{item.title}</span>
-                    {item.badge && (
-                      <span className="ml-auto bg-primary rounded-full w-5 h-5 flex items-center justify-center text-[10px] text-white">
-                        {item.badge}
-                      </span>
-                    )}
                   </div>
                 </Button>
               ))}
@@ -218,7 +203,7 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
               variant="default"
               size="sm"
               className="w-full justify-start bg-primary hover:bg-primary/90 btn-glow"
-              onClick={() => setLocation('/nova-campanha')}
+              onClick={() => setLocation('/campaigns/new')}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Nova Campanha
@@ -227,11 +212,11 @@ export function DashboardSidebar({ sidebarOpen, className }: DashboardSidebarPro
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start mt-3 border-white/10 hover:bg-white/5"
-              onClick={() => setLocation('/')}
+              className="w-full justify-start mt-3 border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              onClick={signOut}
             >
-              <Home className="h-4 w-4 mr-2" />
-              Voltar para o site
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
             </Button>
           </div>
         </div>

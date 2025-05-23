@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { supabase } from '@/lib/supabase';
 
 interface RecentCampaignsProps {
   className?: string;
@@ -25,53 +26,59 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Dados simulados para demonstração
-  const mockCampaigns = [
-    {
-      id: 1,
-      title: "Novo Equipamento de Streaming",
-      description: "Equipamentos profissionais para melhorar a qualidade das lives",
-      goal: 12000,
-      raised: 8750,
-      progress: 72.9,
-      views: 1245,
-      status: "active",
-      created_at: "2024-01-15",
-      days_left: 18
-    },
-    {
-      id: 2,
-      title: "Curso de Edição Avançada",
-      description: "Investimento em curso profissional de edição de vídeo",
-      goal: 5000,
-      raised: 3200,
-      progress: 64.0,
-      views: 856,
-      status: "active",
-      created_at: "2024-01-20",
-      days_left: 25
-    },
-    {
-      id: 3,
-      title: "Setup Gamer Completo",
-      description: "Novo computador e periféricos para gaming",
-      goal: 15000,
-      raised: 15000,
-      progress: 100.0,
-      views: 2134,
-      status: "completed",
-      created_at: "2024-01-01",
-      days_left: 0
-    }
-  ];
-
   useEffect(() => {
-    // Simular carregamento
-    setTimeout(() => {
-      setCampaigns(mockCampaigns);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    if (!user?.id) return;
+
+    const fetchRecentCampaigns = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('campaigns')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error) {
+          console.error('Erro ao buscar campanhas:', error);
+          setCampaigns([]);
+        } else {
+          // Processar dados para incluir informações calculadas
+          const processedCampaigns = data?.map(campaign => {
+            const progress = campaign.goal > 0 ? (campaign.raised / campaign.goal) * 100 : 0;
+            const createdDate = new Date(campaign.created_at);
+            const endDate = new Date(campaign.end_date);
+            const now = new Date();
+            const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+            
+            let status = 'active';
+            if (progress >= 100) {
+              status = 'completed';
+            } else if (endDate < now) {
+              status = 'expired';
+            }
+
+            return {
+              ...campaign,
+              progress: Math.min(progress, 100),
+              days_left: daysLeft,
+              status,
+              views: 0 // Placeholder - você pode implementar um sistema de views posteriormente
+            };
+          }) || [];
+
+          setCampaigns(processedCampaigns);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar campanhas recentes:', err);
+        setCampaigns([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentCampaigns();
+  }, [user?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -79,6 +86,8 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
         return 'bg-green-500/20 text-green-400 border-green-500/30';
       case 'completed':
         return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'expired':
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'paused':
         return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
       default:
@@ -92,6 +101,8 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
         return 'Ativa';
       case 'completed':
         return 'Concluída';
+      case 'expired':
+        return 'Expirada';
       case 'paused':
         return 'Pausada';
       default:
@@ -115,6 +126,32 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
                   <div className="h-20 bg-gray-700/30 rounded-lg"></div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (campaigns.length === 0) {
+    return (
+      <div className={className}>
+        <Card className="border-white/10">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-white flex items-center">
+              <Target className="h-5 w-5 mr-2 text-primary" />
+              Campanhas Recentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Target className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-400 mb-4">Você ainda não criou nenhuma campanha</p>
+              <Button asChild variant="default" size="sm">
+                <Link href="/campaigns/new">
+                  Criar Primeira Campanha
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -169,7 +206,7 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
                 <div className="space-y-2 mb-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">
-                      R$ {campaign.raised.toFixed(2)} de R$ {campaign.goal.toFixed(2)}
+                      R$ {(campaign.raised || 0).toFixed(2)} de R$ {(campaign.goal || 0).toFixed(2)}
                     </span>
                     <span className="text-primary font-medium">
                       {campaign.progress.toFixed(1)}%
@@ -184,18 +221,24 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
                 <div className="flex items-center justify-between text-xs text-gray-400">
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center">
-                      <Eye className="h-3 w-3 mr-1" />
-                      {campaign.views}
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {campaign.status === 'active' && campaign.days_left > 0 
+                        ? `${campaign.days_left} dias restantes` 
+                        : campaign.status === 'completed' 
+                        ? 'Concluída' 
+                        : campaign.status === 'expired'
+                        ? 'Expirada'
+                        : 'Finalizada'}
                     </span>
                     <span className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {campaign.status === 'active' ? `${campaign.days_left} dias restantes` : 'Finalizada'}
+                      {new Date(campaign.created_at).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                    <Link href={`/campaigns/${campaign.id}`}>
+                    <Link href={`/campaigns/my`}>
                       <Edit className="h-3 w-3 mr-1" />
-                      Editar
+                      Ver mais
                     </Link>
                   </Button>
                 </div>
