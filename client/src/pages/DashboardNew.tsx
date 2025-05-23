@@ -162,38 +162,7 @@ export default function Dashboard() {
   }, [user, isLoading, setLocation]);
   
   // Campanhas recentes de exemplo
-  const recentCampaigns = [
-    {
-      id: 1,
-      title: "Ajude Maria a custear seu tratamento",
-      category: "Saúde",
-      imageUrl: "https://images.unsplash.com/photo-1579154392429-40ce9a4ff5e7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGF0aWVudHxlbnwwfHwwfHx8MA%3D%3D",
-      progress: 75,
-      goal: 5000,
-      raised: 3750,
-      daysLeft: 12
-    },
-    {
-      id: 2,
-      title: "Abrigo para animais abandonados",
-      category: "Animais",
-      imageUrl: "https://images.unsplash.com/photo-1593871075120-982e042088d8?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZG9nJTIwcmVzY3VlfGVufDB8fDB8fHww",
-      progress: 45,
-      goal: 10000,
-      raised: 4500,
-      daysLeft: 20
-    },
-    {
-      id: 3,
-      title: "Reformar casa da Dona Joana",
-      category: "Moradia",
-      imageUrl: "https://images.unsplash.com/photo-1607247098789-5c8945a84268?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8aG9tZSUyMHJlcGFpcnxlbnwwfHwwfHx8MA%3D%3D",
-      progress: 60,
-      goal: 7000,
-      raised: 4200,
-      daysLeft: 8
-    }
-  ];
+
   
   // Histórico de atividades
   const activityHistory = [
@@ -554,80 +523,7 @@ export default function Dashboard() {
               </TabsList>
               
               <TabsContent value="campaigns" className="space-y-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-white">Campanhas Recentes</h3>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="border-white/10 hover:bg-white/5"
-                  >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtrar
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  {recentCampaigns.map((campaign) => (
-                    <motion.div 
-                      key={campaign.id}
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                      className="glass-card rounded-xl border border-white/5 overflow-hidden"
-                    >
-                      <div className="h-40 overflow-hidden">
-                        <img 
-                          src={campaign.imageUrl} 
-                          alt={campaign.title} 
-                          className="w-full h-full object-cover hover:scale-105 transition-all duration-300"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <div className="inline-block px-2 py-1 bg-white/10 rounded-md text-xs text-gray-300 mb-2">
-                          {campaign.category}
-                        </div>
-                        <h4 className="font-bold text-white mb-1 line-clamp-2">
-                          {campaign.title}
-                        </h4>
-                        <div className="flex justify-between text-xs text-gray-400 mb-2">
-                          <span>{campaign.daysLeft} dias restantes</span>
-                          <span>{campaign.progress}% concluído</span>
-                        </div>
-                        <div className="h-1.5 bg-white/10 rounded-full mb-3">
-                          <div 
-                            className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-                            style={{ width: `${campaign.progress}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm text-gray-300">
-                            <span className="font-medium text-white">
-                              {hideCampaignValues ? "R$ •••••" : `R$ ${campaign.raised}`}
-                            </span> / {hideCampaignValues ? "R$ •••••" : `R$ ${campaign.goal}`}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs hover:bg-white/5"
-                            onClick={() => setLocation(`/campanhas/${campaign.id}`)}
-                          >
-                            Visualizar
-                            <ChevronRight className="w-3 h-3 ml-1" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-                
-                <div className="flex justify-center mt-6">
-                  <Button
-                    onClick={() => setLocation('/minhas-campanhas')}
-                    variant="outline"
-                    className="border-white/10 hover:bg-white/5"
-                  >
-                    Ver todas minhas campanhas
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
+                <RecentCampaigns />
               </TabsContent>
               
               <TabsContent value="history" className="space-y-4">
