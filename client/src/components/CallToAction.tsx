@@ -23,7 +23,7 @@ export default function CallToAction() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          Realize seu sonho <span className="italic">hoje</span>
+          Pronto para ser um <span className="italic">criador profissional?</span>
         </motion.h2>
         <motion.p 
           className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-white/90"
@@ -32,8 +32,8 @@ export default function CallToAction() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          Milhares de pessoas estão prontas para ajudar você a atingir seu próximo objetivo.
-          Crie sua história e conecte-se com a nossa comunidade de apoiadores.
+          Junte-se aos milhares de criadores que escolheram o MIMO para gerenciar suas campanhas.
+          Ferramentas profissionais, análises detalhadas e suporte especializado.
         </motion.p>
         <motion.div 
           className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6"
@@ -47,9 +47,9 @@ export default function CallToAction() {
             className="bg-white text-primary hover:bg-white/90 font-heading rounded-md shadow-xl btn-glow"
             size="lg"
           >
-            <Link href="#request">
+            <Link href="/register">
               <div className="flex items-center px-6">
-                Faça seu Pedido
+                Criar Conta Grátis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </div>
             </Link>
@@ -60,8 +60,8 @@ export default function CallToAction() {
             className="border-2 border-white text-white hover:bg-white/10 font-heading rounded-md shadow-lg"
             size="lg"
           >
-            <Link href="#help">
-              <div className="px-6">Quero Ajudar</div>
+            <Link href="/login">
+              <div className="px-6">Já sou criador</div>
             </Link>
           </Button>
         </motion.div>

@@ -28,6 +28,9 @@ import { predefinedAchievements } from '@shared/achievements';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 import { OnboardingController } from '@/components/onboarding/OnboardingController';
+import { CreatorAnalytics } from '@/components/dashboard/CreatorAnalytics';
+import { QuickActions } from '@/components/dashboard/QuickActions';
+import { RecentCampaigns } from '@/components/dashboard/RecentCampaigns';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();

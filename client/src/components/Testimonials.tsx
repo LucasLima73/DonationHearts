@@ -10,33 +10,33 @@ const testimonials = [
   {
     id: 1,
     name: "Camila Torres",
-    role: "Influenciadora",
+    role: "Criadora de Conteúdo",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Quando compartilhei meu sonho de ir ao festival de moda em Milão, não esperava que tantas pessoas se conectariam com minha história. O MIMO mudou minha carreira!",
+    quote: "O MIMO revolucionou como gerencio minhas campanhas. O dashboard completo e as métricas detalhadas me ajudaram a aumentar minha arrecadação em 300%!",
     stars: 5
   },
   {
     id: 2,
     name: "Mariana Duarte",
-    role: "Estudante de Cinema",
+    role: "Youtuber",
     image: "https://images.unsplash.com/photo-1619855544858-e05e1e2e9da5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Graças aos apoiadores do MIMO, consegui comprar minha primeira câmera profissional. A comunidade não só doou, mas me incentivou a seguir meu sonho!",
+    quote: "Finalmente uma plataforma feita para criadores! As ferramentas de análise e o sistema de gamificação tornaram o processo muito mais profissional e engajante.",
     stars: 5
   },
   {
     id: 3,
     name: "Sofia Lima",
-    role: "Designer Gráfica",
+    role: "Streamer",
     image: "https://images.unsplash.com/photo-1598550880863-4e8aa3d0edb4?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Abrir meu estúdio parecia impossível, mas a comunidade do MIMO tornou isso realidade. Agora tenho meu próprio espaço e estou realizando projetos incríveis!",
+    quote: "Antes eu usava várias plataformas diferentes. Agora centralizo tudo no MIMO - desde a criação até o acompanhamento das campanhas. Simplificou minha vida!",
     stars: 5
   },
   {
     id: 4,
     name: "Larissa Mendonça",
-    role: "Empreendedora",
+    role: "Podcaster",
     image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150&q=80",
-    quote: "Com o MIMO, consegui lançar minha linha de produtos naturais. A transparência da plataforma fez toda diferença para criar confiança com os apoiadores.",
+    quote: "O suporte do MIMO é excepcional. Eles realmente entendem as necessidades de criadores e estão sempre evoluindo a plataforma baseado no nosso feedback.",
     stars: 5
   }
 ];
@@ -97,7 +97,7 @@ export default function Testimonials() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Histórias de <span className="text-gradient">Sucesso</span>
+            Criadores <span className="text-gradient">Satisfeitos</span>
           </motion.h2>
           <motion.p 
             className="text-gray-300 text-lg max-w-2xl mx-auto"
@@ -106,7 +106,7 @@ export default function Testimonials() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Veja como o MIMO está transformando sonhos em realidade e inspirando pessoas a seguirem seus caminhos.
+            Veja como o MIMO está ajudando criadores de conteúdo a profissionalizarem suas campanhas e atingirem seus objetivos.
           </motion.p>
         </div>
 
