@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import InspiringStories from "@/components/InspiringStories";
+
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
@@ -11,15 +11,15 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>MIMO - Realize sonhos. Conecte corações.</title>
+        <title>MIMO - Plataforma para Criadores de Campanhas</title>
         <meta 
           name="description" 
-          content="MIMO é uma plataforma onde pessoas ajudam pessoas, um desejo de cada vez. Conecte-se a histórias inspiradoras e faça a diferença hoje."
+          content="MIMO é a plataforma definitiva para criadores de conteúdo gerenciarem suas campanhas de arrecadação. Crie, monitore e otimize suas campanhas profissionalmente."
         />
-        <meta property="og:title" content="MIMO - Realize sonhos. Conecte corações." />
+        <meta property="og:title" content="MIMO - Plataforma para Criadores de Campanhas" />
         <meta 
           property="og:description" 
-          content="Uma plataforma onde pessoas ajudam pessoas, um desejo de cada vez."
+          content="A plataforma definitiva para criadores gerenciarem campanhas de arrecadação."
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mimo.app" />
@@ -28,7 +28,6 @@ export default function Home() {
         <Header />
         <main>
           <HeroSection />
-          <InspiringStories />
           <HowItWorks />
           <Testimonials />
           <CallToAction />
