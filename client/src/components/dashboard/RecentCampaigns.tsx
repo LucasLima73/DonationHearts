@@ -31,6 +31,8 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
 
     const fetchRecentCampaigns = async () => {
       setIsLoading(true);
+      console.log('Buscando campanhas recentes para o usuário:', user.id);
+      
       try {
         const { data, error } = await supabase
           .from('campaigns')
@@ -39,15 +41,18 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
           .order('created_at', { ascending: false })
           .limit(3);
 
+        console.log('Resposta do Supabase - campanhas:', { data, error });
+
         if (error) {
           console.error('Erro ao buscar campanhas:', error);
           setCampaigns([]);
         } else {
+          console.log('Campanhas encontradas:', data?.length || 0);
+          
           // Processar dados para incluir informações calculadas
           const processedCampaigns = data?.map(campaign => {
-            const progress = campaign.goal > 0 ? (campaign.raised / campaign.goal) * 100 : 0;
-            const createdDate = new Date(campaign.created_at);
-            const endDate = new Date(campaign.end_date);
+            const progress = campaign.goal > 0 ? ((campaign.raised || 0) / campaign.goal) * 100 : 0;
+            const endDate = campaign.end_date ? new Date(campaign.end_date) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 dias por padrão
             const now = new Date();
             const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
             
@@ -63,10 +68,11 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
               progress: Math.min(progress, 100),
               days_left: daysLeft,
               status,
-              views: 0 // Placeholder - você pode implementar um sistema de views posteriormente
+              views: 0
             };
           }) || [];
 
+          console.log('Campanhas processadas:', processedCampaigns);
           setCampaigns(processedCampaigns);
         }
       } catch (err) {
@@ -232,7 +238,7 @@ export function RecentCampaigns({ className }: RecentCampaignsProps) {
                     </span>
                     <span className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(campaign.created_at).toLocaleDateString('pt-BR')}
+                      Criada em {new Date(campaign.created_at).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="h-6 px-2 text-xs">
