@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [hideCampaignValues, setHideCampaignValues] = useState(false);
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [welcomeChecked, setWelcomeChecked] = useState(false);
   
   // Estados para armazenar os dados reais
   const [userPoints, setUserPoints] = useState(0);
@@ -69,21 +70,22 @@ export default function Dashboard() {
   
   // Verificar se é a primeira vez do usuário e mostrar mensagem de boas-vindas
   useEffect(() => {
-    if (!isLoading && user?.id) {
+    if (!isLoading && user?.id && !welcomeChecked) {
       const welcomeKey = `doeaqui-user-welcomed-${user.id}`;
       const hasBeenWelcomed = localStorage.getItem(welcomeKey);
       
-      if (hasBeenWelcomed === null) {
+      if (hasBeenWelcomed === null || hasBeenWelcomed !== 'true') {
         setIsFirstTimeUser(true);
         setShowWelcomeMessage(true);
-        // Marcar que o usuário já foi recebido
+        // Marcar imediatamente que o usuário já foi recebido
         localStorage.setItem(welcomeKey, 'true');
       } else {
         setIsFirstTimeUser(false);
         setShowWelcomeMessage(false);
       }
+      setWelcomeChecked(true);
     }
-  }, [user?.id, isLoading]);
+  }, [user?.id, isLoading, welcomeChecked]);
   
   // Carregar dados reais de doações
   useEffect(() => {
@@ -245,7 +247,7 @@ export default function Dashboard() {
           <div className="container mx-auto w-full max-w-[1200px] px-4 py-8">
             
             {/* Mensagem de boas-vindas personalizada para primeira visita */}
-            {showWelcomeMessage && (
+            {welcomeChecked && showWelcomeMessage && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
